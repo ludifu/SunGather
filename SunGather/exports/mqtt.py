@@ -121,7 +121,7 @@ class export_mqtt(object):
                 if ha_sensor.get('register', False):
                     if inverter.getRegisterUnit(ha_sensor.get('register')):
                         config_msg['unit_of_measurement'] = inverter.getRegisterUnit(ha_sensor.get('register'))
-                
+
                 config_msg['device'] = ha_device
 
                 # <discovery_prefix>/<component>/<object_id>/config
