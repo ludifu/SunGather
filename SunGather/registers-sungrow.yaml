@@ -1169,7 +1169,7 @@ registers:
       mask: 2
       datarange:
         - response: 1
-          value: "1"
+          value: 1
         - response: 0
           value: "-1"
       models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
@@ -1180,7 +1180,7 @@ registers:
       mask: 4
       datarange:
         - response: 1
-          value: "1"
+          value: 1
         - response: 0
           value: "-1"
       models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
@@ -1191,7 +1191,7 @@ registers:
       mask: 8
       datarange:
         - response: 1
-          value: "1"
+          value: 1
         - response: 0
           value: "-1"
       models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
@@ -1202,7 +1202,7 @@ registers:
       mask: 16
       datarange:
         - response: 1
-          value: "1"
+          value: 1
         - response: 0
           value: "-1"
       models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
@@ -1213,7 +1213,7 @@ registers:
       mask: 32
       datarange:
         - response: 1
-          value: "1"
+          value: 1
         - response: 0
           value: "-1"
       models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
@@ -1224,7 +1224,7 @@ registers:
       mask: 128
       datarange:
         - response: 1
-          value: "1"
+          value: 1
         - response: 0
           value: "-1"
       models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
