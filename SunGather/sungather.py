@@ -269,15 +269,14 @@ class SungrowInverter():
 
                     # We convert a system response to a human value 
                     if register.get('datarange'):
-                        match = False
+                        register_value = None
                         for value in register.get('datarange'):
                             if value['response'] == rr.registers[num] or value['response'] == register_value:
                                 register_value = value['value']
-                                match = True
-                        if not match:
-                            default = register.get('default')
-                            logging.debug(f"No matching value for {register_value} in datarange of {register_name}, using default {default}")
-                            register_value = default
+
+                    if register_value is None:
+                        register_value = register.get('default')
+                        logging.warning(f"No value for {register_name}, using default {register_value}")
 
                     if register.get('accuracy'):
                         register_value = round(register_value * register.get('accuracy'), 2)
