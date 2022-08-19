@@ -42,9 +42,9 @@ class SungrowInverter():
         self.registers_custom = [   {'name': 'run_state', 'address': 'vr001'},
                                     {'name': 'timestamp', 'address': 'vr002'},
                                     {'name': 'last_reset', 'address': 'vr003'},
-                                    {'name': 'export_to_grid', 'unit': 'W', 'address': 'vr004'}, 
-                                    {'name': 'import_from_grid', 'unit': 'W', 'address': 'vr005'}, 
-                                    {'name': 'daily_export_to_grid', 'unit': 'kWh', 'address': 'vr006'}, 
+                                    {'name': 'export_to_grid', 'unit': 'W', 'address': 'vr004'},
+                                    {'name': 'import_from_grid', 'unit': 'W', 'address': 'vr005'},
+                                    {'name': 'daily_export_to_grid', 'unit': 'kWh', 'address': 'vr006'},
                                     {'name': 'daily_import_from_grid', 'unit': 'kWh', 'address': 'vr007'}
                                 ]
 
@@ -269,15 +269,14 @@ class SungrowInverter():
 
                     # We convert a system response to a human value 
                     if register.get('datarange'):
-                        match = False
+                        register_value = None
                         for value in register.get('datarange'):
                             if value['response'] == rr.registers[num] or value['response'] == register_value:
                                 register_value = value['value']
-                                match = True
-                        if not match:
-                            default = register.get('default')
-                            logging.debug(f"No matching value for {register_value} in datarange of {register_name}, using default {default}")
-                            register_value = default
+
+                    if register_value is None:
+                        register_value = register.get('default')
+                        logging.warning(f"No value for {register_name}, using default {register_value}")
 
                     if register.get('accuracy'):
                         register_value = round(register_value * register.get('accuracy'), 2)
@@ -337,7 +336,7 @@ class SungrowInverter():
     def getSerialNumber(self):
         return self.inverter_config['serial_number']
 
-    def scrape(self):        
+    def scrape(self):
         scrape_start = datetime.now()
 
         # Clear previous inverter values, persist some values
@@ -432,13 +431,13 @@ class SungrowInverter():
         # to help with graphing.
         try:
             if self.latest_scrape.get('start_stop'):
-                logging.info(f"DEBUG: start_stop:{self.latest_scrape.get('start_stop', 'null')} work_state_1:{self.latest_scrape.get('work_state_1', 'null')}")    
+                logging.info(f"DEBUG: start_stop:{self.latest_scrape.get('start_stop', 'null')} work_state_1:{self.latest_scrape.get('work_state_1', 'null')}")
                 if self.latest_scrape.get('start_stop', False) == 'Start' and self.latest_scrape.get('work_state_1', False).contains('Run'):
                     self.latest_scrape["run_state"] = "ON"
                 else:
                     self.latest_scrape["run_state"] = "OFF"
             else:
-                logging.info(f"DEBUG: Couldn't read start_stop so run_state is OFF")    
+                logging.info(f"DEBUG: Couldn't read start_stop so run_state is OFF")
                 self.latest_scrape["run_state"] = "OFF"
         except Exception:
             pass
@@ -483,12 +482,12 @@ class SungrowInverter():
                         self.latest_scrape["export_to_grid"] = power
                 except Exception:
                     pass
-        
+
         try: # If inverter is returning no data for load_power, we can calculate it manually
             if not self.latest_scrape["load_power"]:
                 self.latest_scrape["load_power"] = int(self.latest_scrape.get('total_active_power')) + int(self.latest_scrape.get('meter_power'))
         except Exception:
-            pass  
+            pass
 
         ## vr004, vr005
         if not self.latest_scrape.get('daily_export_to_grid', False):
@@ -498,7 +497,7 @@ class SungrowInverter():
 
         ## vr005
         if not self.latest_scrape.get('daily_import_from_grid', False):
-            self.latest_scrape["daily_import_from_grid"] = 0       
+            self.latest_scrape["daily_import_from_grid"] = 0
 
         self.latest_scrape["daily_import_from_grid"] += ((self.latest_scrape["import_from_grid"] / 1000) * (self.inverter_config['scan_interval'] / 60 / 60) )
 
