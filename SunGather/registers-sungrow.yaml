@@ -1872,6 +1872,20 @@ registers:
 #     address: 5048-5154
 #   - name: "Reserved"    
 #     address: 5155-5199
+    - name: "max_soc"
+      address: 13058
+      level: 2
+      accuracy: 0.1
+      datatype: "U16"
+      unit: "%"
+      models: ["SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "min_soc"
+      address: 13059
+      level: 2
+      accuracy: 0.1
+      datatype: "U16"
+      unit: "%"
+      models: ["SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
     - name: "start_charging_power"
       address: 13084
       level: 2
