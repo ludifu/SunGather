@@ -818,6 +818,32 @@ registers:
 #   - name: "Reserved"    
 #     address: 5153-7012
 ##### Residential Hybrid Inverters only START
+    #https://www.photovoltaikforum.com/thread/166134-daten-lesen-vom-sungrow-wechselrichtern-modbus/?pageNo=13
+    - name: "meter_power"
+      level: 2
+      address: 5601
+      datatype: "S32"
+      smart_meter: True
+      unit: "W"
+      models: ["SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "meter_a_phase_power"
+      level: 2
+      address: 5603
+      datatype: "S32"
+      unit: "W"
+      models: ["SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "meter_b_phase_power"
+      level: 2
+      address: 5605
+      datatype: "S32"
+      unit: "W"
+      models: ["SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "meter_c_phase_power"
+      level: 2
+      address: 5607
+      datatype: "S32"
+      unit: "W"
+      models: ["SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
     - name: "export_limit_min"
       level: 2
       address: 5622
@@ -850,6 +876,32 @@ registers:
       address: 5636
       datatype: "U16"
       unit: "A"
+      models: ["SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    #https://www.photovoltaikforum.com/thread/166134-daten-lesen-vom-sungrow-wechselrichtern-modbus/?pageNo=13
+    - name: "backup_power"
+      level: 2
+      address: 5726
+      datatype: "S32"
+      smart_meter: True
+      unit: "W"
+      models: ["SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "backup_a_phase_power"
+      level: 2
+      address: 5723
+      datatype: "S32"
+      unit: "W"
+      models: ["SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "backup_b_phase_power"
+      level: 2
+      address: 5724
+      datatype: "S32"
+      unit: "W"
+      models: ["SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "backup_c_phase_power"
+      level: 2
+      address: 5725
+      datatype: "S32"
+      unit: "W"
       models: ["SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
     - name: "pv_power_of_today"
       level: 1
@@ -1939,6 +1991,8 @@ scan: # these have to be 1 less than the first register
     - start: 5200
       range: 100
     - start: 5600
+      range: 100
+    - start: 5700
       range: 100
     - start: 6099
       range: 100
