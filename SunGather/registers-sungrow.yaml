@@ -916,20 +916,324 @@ registers:
       accuracy: 0.1
       unit: "kWh"
       models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
-    - name: "monthly_pv_energy_yields"    
+    - name: "monthly_pv_generation_01_january"
       level: 2
       address: 6227
-      datatype: "U16"
-      unit: "kWh"
-      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
-    - name: "yearly_pv_energy_yields"    
-      level: 2
-      address: 6250
       datatype: "U16"
       accuracy: 0.1
       unit: "kWh"
       models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
-    - name: "direct_power_consumption_today_pv"    
+    - name: "monthly_pv_generation_02_february"
+      level: 2
+      address: 6228
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "monthly_pv_generation_03_march"
+      level: 2
+      address: 6229
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "monthly_pv_generation_04_april"
+      level: 2
+      address: 6230
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "monthly_pv_generation_05_may"
+      level: 2
+      address: 6231
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "monthly_pv_generation_06_june"
+      level: 2
+      address: 6232
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "monthly_pv_generation_07_july"
+      level: 2
+      address: 6233
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "monthly_pv_generation_08_august"
+      level: 2
+      address: 6234
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "monthly_pv_generation_09_september"
+      level: 2
+      address: 6235
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "monthly_pv_generation_10_october"
+      level: 2
+      address: 6236
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "monthly_pv_generation_11_november"
+      level: 2
+      address: 6237
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "monthly_pv_generation_12_december"
+      level: 2
+      address: 6238
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "yearly_pv_generation_2019"
+      level: 2
+      address: 6258
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "yearly_pv_generation_2020"
+      level: 2
+      address: 6260
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "yearly_pv_generation_2021"
+      level: 2
+      address: 6262
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "yearly_pv_generation_2022"
+      level: 2
+      address: 6264
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "yearly_pv_generation_2023"
+      level: 2
+      address: 6266
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "yearly_pv_generation_2024"
+      level: 2
+      address: 6268
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "yearly_pv_generation_2025"
+      level: 2
+      address: 6270
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "yearly_pv_generation_2026"
+      level: 2
+      address: 6272
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "yearly_pv_generation_2027"
+      level: 2
+      address: 6274
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "yearly_pv_generation_2028"
+      level: 2
+      address: 6276
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "yearly_pv_generation_2029"
+      level: 2
+      address: 6278
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "monthly_export_01_january"
+      level: 2
+      address: 6596
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "monthly_export_02_february"
+      level: 2
+      address: 6597
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "monthly_export_03_march"
+      level: 2
+      address: 6598
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "monthly_export_04_april"
+      level: 2
+      address: 6599
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "monthly_export_05_may"
+      level: 2
+      address: 6600
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "monthly_export_06_june"
+      level: 2
+      address: 6601
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "monthly_export_07_july"
+      level: 2
+      address: 6602
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "monthly_export_08_august"
+      level: 2
+      address: 6603
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "monthly_export_09_september"
+      level: 2
+      address: 6604
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "monthly_export_10_october"
+      level: 2
+      address: 6605
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "monthly_export_11_november"
+      level: 2
+      address: 6606
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "monthly_export_12_december"
+      level: 2
+      address: 6607
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+
+    - name: "yearly_export_2019"
+      level: 2
+      address: 6616
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "yearly_export_2020"
+      level: 2
+      address: 6618
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "yearly_export_2021"
+      level: 2
+      address: 6620
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "yearly_export_2022"
+      level: 2
+      address: 6622
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "yearly_export_2023"
+      level: 2
+      address: 6624
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "yearly_export_2024"
+      level: 2
+      address: 6626
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "yearly_export_2025"
+      level: 2
+      address: 6628
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "yearly_export_2026"
+      level: 2
+      address: 6630
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "yearly_export_2027"
+      level: 2
+      address: 6632
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "yearly_export_2028"
+      level: 2
+      address: 6634
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+
+    - name: "direct_power_consumption_today_pv"
       level: 1
       address: 6290
       datatype: "U16"
@@ -969,21 +1273,7 @@ registers:
       accuracy: 0.1
       unit: "kWh"
       models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
-    - name: "export_power_from_pv_monthly"    
-      level: 2
-      address: 6596
-      datatype: "U16"
-      accuracy: 0.1
-      unit: "kWh"
-      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
-    - name: "export_power_from_pv_yearly"    
-      level: 2
-      address: 6608
-      datatype: "U16"
-      accuracy: 0.1
-      unit: "kWh"
-      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
-    - name: "battery_charge_power_from_pv_today"    
+    - name: "battery_charge_power_from_pv_today"
       level: 1
       address: 6648
       datatype: "U16"
