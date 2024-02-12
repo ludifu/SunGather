@@ -36,7 +36,7 @@ class export_mqtt(object):
             logging.info(f"MQTT: Host config is required")
             return False
         client_id = self.mqtt_config['client_id']
-        self.mqtt_client = mqtt.Client(client_id)
+        self.mqtt_client = mqtt.Client(callback_api_version=mqtt.CallbackAPIVersion.VERSION1, client_id=client_id)
         self.mqtt_client.on_connect = self.on_connect
         self.mqtt_client.on_disconnect = self.on_disconnect
         self.mqtt_client.on_publish = self.on_publish
