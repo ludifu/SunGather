@@ -36,7 +36,7 @@ class export_mqtt(object):
             logging.info(f"MQTT: Host config is required")
             return False
         client_id = self.mqtt_config['client_id']
-        self.mqtt_client = mqtt.Client(callback_api_version=mqtt.CallbackAPIVersion.VERSION1, client_id=client_id)
+        self.mqtt_client = mqtt.Client(callback_api_version=mqtt.CallbackAPIVersion.VERSION2, client_id=client_id)
         self.mqtt_client.on_connect = self.on_connect
         self.mqtt_client.on_disconnect = self.on_disconnect
         self.mqtt_client.on_publish = self.on_publish
@@ -68,13 +68,13 @@ class export_mqtt(object):
 
         return True
 
-    def on_connect(self, client, userdata, flags, rc):
+    def on_connect(self, client, userdata, flags, reason_code, properties):
         logging.info(f"MQTT: Connected to {client._host}:{client._port}")
 
-    def on_disconnect(self, client, userdata, rc):
+    def on_disconnect(self, client, userdata, reason_code, properties):
         logging.info(f"MQTT: Server Disconnected code: {rc}")
     
-    def on_publish(self, client, userdata, mid):
+    def on_publish(self, client, userdata, mid, reason_code, properties):
         try:
             self.mqtt_queue.remove(mid)
         except Exception as err:
