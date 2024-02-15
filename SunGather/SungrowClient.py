@@ -106,102 +106,154 @@ class SungrowClient():
         except:
             pass
         self.client = None
+ 
 
-    def configure_registers(self,registersfile):
-        # Check model so we can load only valid registers
+    def register_length(self, reg):
+        # return the number of 16 bit registers that the register ´reg` requires.
+        reg_datatype = reg.get("datatype")
+        if reg_datatype == "S32" or reg_datatype == "U32":
+            reg_len = 2
+        elif reg_datatype == "UTF-8":
+            # If length is defined as attribute of the register, we're fine.
+            # If not use a default of 15. Rationale: As of the Sungrow specification (Hybrid) 1.0.23 the maximum length of any UTF-8 register is 15.
+            # In the worst case we read 5 registers more than required, but this should not fail.
+            reg_len = reg.get("length", 15)
+        else:
+            reg_len = 1
+        return reg_len
+
+
+    def load_single_register(self, reg_name, reg_type, registersfile):
+        # load a single register from the inverter and return the register value.
+        if reg_type == 'read':
+            reg_list = registersfile['registers'][0]['read']
+        else:
+            reg_list = registersfile['registers'][1]['hold']
+        for register in reg_list:
+            if register.get('name') == reg_name:
+                reg_address = register['address']
+                reg_len = self.register_length(register)
+                register['type'] = reg_type
+                self.registers.append(register)
+                break
+        if reg_address is None:
+            logging.warning(f"Failed loading register ´{reg_name}` of type ´{reg_type}`. Register is not defined or address is missing in the register definition!")
+            return None
+
+        success = self.load_registers(reg_type, reg_address -1, reg_len) # Needs to be address -1
+        self.registers.pop()
+        if not success:
+            logging.warning(f"Failed loading register ´{reg_name}` of type ´{reg_type}`!")
+            return None
+        return self.latest_scrape.get(reg_name)
+
+
+    def detect_model(self,registersfile):
+        result = self.load_single_register("device_type_code", 'read', registersfile)
+        if not result:
+            logging.warning(f'Model detection failed, please set model in config.py!')
+        elif isinstance(result, int):
+            logging.warning(f"Unknown model type code detected: ´{result}`.")
+        else:
+            self.inverter_config['model'] = result
+            logging.info(f"Model detected: ´{result}`.")
+
+
+    def check_model(self, registersfile):
+        # Check if the inverter model is configured, otherwise try to read the model code from the inverter.
         if self.inverter_config.get('model'):
-            logging.info(f"Bypassing Model Detection, Using config: {self.inverter_config.get('model')}")
+            logging.info(f"Model configured: ´{self.inverter_config.get('model')}`.")
         else:
-            # Load just the register to detect model, then we can load the rest of registers based on returned model
-            for register in registersfile['registers'][0]['read']:
-                if register.get('name') == "device_type_code":
-                    register['type'] = "read"
-                    self.registers.append(register)
-                    if self.load_registers(register['type'], register['address'] -1, 1): # Needs to be address -1
-                        if isinstance(self.latest_scrape.get('device_type_code'),int):
-                            logging.warning(f"Unknown Type Code Detected: {self.latest_scrape.get('device_type_code')}")
-                        else:
-                            self.inverter_config['model'] = self.latest_scrape.get('device_type_code')
-                            logging.info(f"Detected Model: {self.inverter_config.get('model')}")
-                    else:
-                        logging.info(f'Model detection failed, please set model in config.py')
-                    self.registers.pop()
-                    break
+            logging.info(f"Model not configured, trying to detect model ...")
+            self.detect_model(registersfile)
 
-        if self.inverter_config.get('serial_number'):
-            logging.info(f"Bypassing Serial Detection, Using config: {self.inverter_config.get('serial_number')}")
+
+    def detect_serial(self,registersfile):
+        result = self.load_single_register("serial_number", 'read', registersfile)
+        if not result:
+            logging.warning(f'Serial detection failed, please set serial number in config.py!')
+        elif isinstance(result, int):
+            logging.warning(f"Unknown result for serial number detected: ´{result}`.")
         else:
-            # Load just the register to detect serial number, then we can load the rest of registers based on returned model
-            for register in registersfile['registers'][0]['read']:
-                if register.get('name') == "serial_number":
-                    register['type'] = "read"
-                    self.registers.append(register)
-                    if self.load_registers(register['type'], register['address'] -1, 10): # Needs to be address -1
-                        if isinstance(self.latest_scrape.get('serial_number'),int):
-                            logging.warning(f"Unknown Type Code Detected: {self.latest_scrape.get('serial_number')}")
-                        else:
-                            self.inverter_config['serial_number'] = self.latest_scrape.get('serial_number')
-                            logging.info(f"Detected Serial: {self.inverter_config.get('serial_number')}")
-                    else:
-                        logging.info(f'Serial detection failed, please set serial number in config.py')
-                    self.registers.pop()
-                    break
+            self.inverter_config['serial_numbe'] = result
+            logging.info(f"Serial number detected: ´{result}`.")
 
+
+    def check_serial_number(self, registersfile):
+        # Check whether serial number is configured, otherwise load from the inverter.
+        if self.inverter_config.get('serial_number', None) is not None:
+            logging.info(f"Serial number configured: ´{self.inverter_config.get('serial_number')}`.")
+        else:
+            logging.info(f"Serial number not configured, trying to detect serial number ...")
+            self.detect_serial(registersfile)
+
+
+    def build_register_list(self, registersfile):
         # Load register list based on name and value after checking model
         for register in registersfile['registers'][0]['read']:
-            if register.get('level',3) <= self.inverter_config.get('level') or self.inverter_config.get('level') == 3:
-                register['type'] = "read"
-                register.pop('level')
-                if register.get('smart_meter') and self.inverter_config.get('smart_meter'):
-                    register.pop('models')
-                    self.registers.append(register)
-                elif register.get('models') and not self.inverter_config.get('level') == 3:
-                    for supported_model in register.get('models'):
-                        if supported_model == self.inverter_config.get('model'):
-                            register.pop('models')
-                            self.registers.append(register)
-                else:
-                    self.registers.append(register)
-
+            self.append_register_if_available_for_reading(register, 'read')
         for register in registersfile['registers'][1]['hold']:
-            if register.get('level',3) <= self.inverter_config.get('level') or self.inverter_config.get('level') == 3:
-                register['type'] = "hold"
-                register.pop('level')
-                if register.get('smart_meter') and self.inverter_config.get('smart_meter'):
-                    register.pop('models')
-                    self.registers.append(register)
-                elif register.get('models') and not self.inverter_config.get('level',1) == 3:
-                    for supported_model in register.get('models'):
-                        if supported_model == self.inverter_config.get('model'):
-                            register.pop('models')
-                            self.registers.append(register)
-                else:
-                    self.registers.append(register)
+            self.append_register_if_available_for_reading(register, 'hold')
 
-        # Load register list based om name and value after checking model
+
+    def append_register_if_available_for_reading(self, register, reg_type):
+        # register will be appended only if it is available for reading in this installation.
+        if register.get('level',3) <= self.inverter_config.get('level') or self.inverter_config.get('level') == 3:
+            register['type'] = reg_type
+            register.pop('level')
+            if register.get('smart_meter') and self.inverter_config.get('smart_meter'):
+                # read register, if it is provided by a smart meter and such a device is available according to the config.
+                register.pop('models')
+                self.registers.append(register)
+            elif register.get('models') and not self.inverter_config.get('level') == 3:
+                # read register, if it is provided by specific inverter models only and our inverter is among the supported models:
+                # whether the register is available for this model at all is only checked, if level is < 3!
+                for supported_model in register.get('models'):
+                    if supported_model == self.inverter_config.get('model'):
+                        register.pop('models')
+                        self.registers.append(register)
+            else:
+                # read any remaining registers: even if the register is not configured to be available for this model.
+                self.registers.append(register)
+
+
+    def build_range_list(self, registersfile):
+        # Build a list of address ranges to read from the inverter. Only address ranges are of interest which contain
+        # at least one register we are interested in.
         for register_range in registersfile['scan'][0]['read']:
-            register_range_used = False
-            register_range['type'] = "read"
-            for register in self.registers:
-                if register.get("type") == register_range.get("type"):
-                    if register.get('address') >= register_range.get("start") and register.get('address') <= (register_range.get("start") + register_range.get("range")):
-                        register_range_used = True
-                        continue
-            if register_range_used:
-                self.register_ranges.append(register_range)
-
-
+            self.append_address_range_if_required(register_range, 'read')
         for register_range in registersfile['scan'][1]['hold']:
-            register_range_used = False
-            register_range['type'] = "hold"
-            for register in self.registers:
-                if register.get("type") == register_range.get("type"):
-                    if register.get('address') >= register_range.get("start") and register.get('address') <= (register_range.get("start") + register_range.get("range")):
-                        register_range_used = True
-                        continue
-            if register_range_used:
-                self.register_ranges.append(register_range)
+            self.append_address_range_if_required(register_range, 'hold')
+        # logging.debug(f"The following address ranges will be scraped: {self.register_ranges}.")
+
+
+    def append_address_range_if_required(self, reg_range, reg_type):
+        # Search for registers which are located in this address range, if any are found append the address range.
+        range_start = reg_range.get("start")
+        range_end = range_start  + reg_range.get("range")
+        for register in self.registers:
+            if register.get("type") == reg_type:
+                reg_address = register.get('address')
+                if reg_address >= range_start and reg_address <= range_end:
+                    reg_range['type'] = reg_type
+                    self.register_ranges.append(reg_range)
+                    return
+
+
+    def configure_registers(self,registersfile):
+        # Determine the inverter model from config or by scraping:
+        self.check_model(registersfile)
+
+        # Determine the inverter's serial number from config or by scraping:
+        self.check_serial_number(registersfile)
+
+        # Filter the registers into a list available for scraping in this installation:
+        self.build_register_list(registersfile)
+
+        # Filter the list of address areas to read from the inverter to those which contain available registers:
+        self.build_range_list(registersfile)
         return True
+
 
     def load_registers(self, register_type, start, count=100):
         try:
