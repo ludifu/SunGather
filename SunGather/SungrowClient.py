@@ -91,6 +91,8 @@ class SungrowClient():
             return self.connect()
 
     def close(self):
+        if self.inverter_config['connection'] == "http":
+            return
         logging.info("Closing Session: " + str(self.client))
         try:
             self.client.close()
