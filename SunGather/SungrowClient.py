@@ -31,7 +31,6 @@ class SungrowClient():
             "slave":                     config_inverter.get('slave'),
             "dyna_scan":                 config_inverter.get('dyna_scan'),
             "disable_custom_registers":  config_inverter.get('disable_custom_registers'),
-
             "start_time":       ""
         }
         self.client = None
@@ -56,6 +55,7 @@ class SungrowClient():
         self.latest_scrape = {}
 
     def connect(self):
+        logging.debug("Connecting to the inverter ...")
         if self.client:
             try:
                 self.client.connect()
@@ -73,7 +73,7 @@ class SungrowClient():
         else:
             logging.warning(f"Inverter: Unknown connection type {self.inverter_config['connection']}, Valid options are http, sungrow or modbus")
             return False
-        logging.info("Connection: " + str(self.client))
+        logging.info("Client created for connection to inverter: " + str(self.client))
 
         try:
             self.client.connect()
@@ -84,35 +84,35 @@ class SungrowClient():
         return True
 
     def checkConnection(self):
-        logging.debug("Checking Modbus Connection")
+        logging.debug("Checking whether connection to inverter is still established ...")
         if self.client:
             if self.client.is_socket_open():
-                logging.debug("Modbus, Session is still connected")
+                logging.debug("... Modbus session is still connected.")
                 return True
             else:
-                logging.info(f'Modbus, Connecting new session')
+                logging.debug(f'... Modbus session disconnected, connecting new session.')
                 return self.connect()
         else:
-            logging.info(f'Modbus client is not connected, attempting to reconnect')
+            logging.debug(f'... Client is not connected, attempting to reconnect.')
             return self.connect()
 
     def close(self):
         if self.inverter_config['connection'] == "http":
             return
-        logging.info("Closing Session: " + str(self.client))
+        logging.debug("Closing Session: " + str(self.client))
         try:
             self.client.close()
         except:
             pass
 
     def disconnect(self):
-        logging.info("Disconnecting: " + str(self.client))
+        logging.debug("Disconnecting: " + str(self.client))
         try:
             self.client.close()
         except:
             pass
         self.client = None
- 
+
 
     def register_length(self, reg):
         # return the number of 16 bit registers that the register ´reg` requires.
@@ -570,6 +570,7 @@ class SungrowClient():
             self.latest_scrape["daily_export_to_grid"] = 0
             self.latest_scrape["daily_import_from_grid"] = 0
             self.latest_scrape['last_reset'] = self.latest_scrape["timestamp"]
+
         ## vr004 - import_from_grid, vr005 - export_to_grid
         # Create a registers for Power imported and exported to/from Grid
         if self.inverter_config['level'] >= 1:
