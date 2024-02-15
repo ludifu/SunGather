@@ -671,3 +671,11 @@ class SungrowClient():
 
         return True
 
+
+    def print_register_list(self):
+        print(f"+------------------------------------------+-------+------+-------+")
+        print("| {:<40} | {:^5} | {:<4} | {:<5} |".format('register name', 'unit', 'type', 'freq.'))
+        print(f"+------------------------------------------+-------+------+-------+")
+        for reg in self.registers:
+            print("| {:<40} | {:^5} | {:<4} | {:>5} |".format(reg["name"], reg.get("unit", ""), reg["type"], reg.get("update_frequency", "")))
+        print(f"+------------------------------------------+-------+------+-------+")
