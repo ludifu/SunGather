@@ -21,14 +21,17 @@ class SungrowClient():
             "RetryOnEmpty": False,
         }
         self.inverter_config = {
-            "model":            config_inverter.get('model'),
-            "serial_number":    config_inverter.get('serial_number'),
-            "level":            config_inverter.get('level'),
-            "scan_interval":    config_inverter.get('scan_interval'),
-            "use_local_time":   config_inverter.get('use_local_time'),
-            "smart_meter":      config_inverter.get('smart_meter'),
-            "connection":       config_inverter.get('connection'),
-            "slave":            config_inverter.get('slave'),
+            "model":                     config_inverter.get('model'),
+            "serial_number":             config_inverter.get('serial_number'),
+            "level":                     config_inverter.get('level'),
+            "scan_interval":             config_inverter.get('scan_interval'),
+            "use_local_time":            config_inverter.get('use_local_time'),
+            "smart_meter":               config_inverter.get('smart_meter'),
+            "connection":                config_inverter.get('connection'),
+            "slave":                     config_inverter.get('slave'),
+            "dyna_scan":                 config_inverter.get('dyna_scan'),
+            "disable_custom_registers":  config_inverter.get('disable_custom_registers'),
+
             "start_time":       ""
         }
         self.client = None
@@ -436,103 +439,104 @@ class SungrowClient():
     def getSerialNumber(self):
         return self.inverter_config['serial_number']
 
-    def scrape(self):        
-        scrape_start = datetime.now()
 
-        # Clear previous inverter values, persist some values
-        persist_registers = {
-            "run_state":                self.latest_scrape.get("run_state","ON"),
-            "last_reset":               self.latest_scrape.get("last_reset",""),
-            "daily_export_to_grid":     self.latest_scrape.get("daily_export_to_grid",0),
-            "daily_import_from_grid":   self.latest_scrape.get("daily_import_from_grid",0),
-        }
+    def build_dyna_scan_address_ranges(self):
+        # maximum length of an address range to read in one batch.
+        # According to pyModbusTCP documentation the maximum number of registers to read with read_input_registers() is 125.
+        max_range_len = 125
+        ranges = []
+        for reg_type in ["read", "hold"]:
+            # extract the registers by type because every range may only contain registers of either "hold" or "read" type.
+            regs = list(filter(lambda x: x.get("type") == reg_type, self.registers))
+            # Sort registers in ascending order by address.
+            regs = sorted(regs, key=lambda d: d['address'])
 
-        self.latest_scrape = {}
-        self.latest_scrape['device_type_code'] = self.inverter_config['model']
+            range_start = 0
+            timenow = datetime.now()
+            for reg in regs:
+                # skip reg if it has an update frequency set and the last update has been within the configured update_frequency:
+                if reg.get("update_frequency") and reg.get("last_update"):
+                    logging.debug(f"Register {reg.get('name')} has update_frequency = {reg.get('update_frequency')} and last_update = {reg.get('last_update')}.")
+                    if (datetime.now() - reg["last_update"]).total_seconds() >= reg.get("update_frequency"):
+                        logging.debug(f"Dropping register {reg.get('name')} from dynamically build scrape range due to update frequency.")
+                        continue
+                reg_addr =  reg.get("address")
+                reg_len = self.register_length(reg)
+                reg_datatype = reg.get("datatype")
+                if (range_start == 0):
+                    range_start = reg_addr # start a new range
+                    range_end = reg_addr + reg_len - 1
+                    continue
+                if reg_addr < range_start + max_range_len - (reg_len - 1):
+                    range_end = reg_addr + reg_len - 1
+                    continue
+                # previous register did not fit in the current range anymore. Emit current range and start a new one
+                ranges.append({"start": range_start - 1, "range": range_end - range_start + 1, "type": reg_type})
+                range_start = 0
+            # loop finished, now complete the last open range, if one has been started:
+            if range_start > 0:
+                ranges.append({"start": range_start - 1, "range": range_end - range_start + 1, "type": reg_type})
 
-        for register, value in persist_registers.items():
-            self.latest_scrape[register] = value
+        logging.debug(f"Built address ranges for reading: {ranges}")
+        return ranges
 
-        load_registers_count = 0
-        load_registers_failed = 0
 
-        for range in self.register_ranges:
-            load_registers_count +=1
-            logging.debug(f'Scraping: {range.get("type")}, {range.get("start")}:{range.get("range")}')
-            if not self.load_registers(range.get('type'), int(range.get('start')), int(range.get('range'))):
-                load_registers_failed +=1
-        if load_registers_failed == load_registers_count:
-            # If every scrape fails, disconnect the client
-            #logging.warning
-            self.disconnect()
-            return False
-        if load_registers_failed > 0:
-            logging.info(f'Scraping: {load_registers_failed}/{load_registers_count} registers failed to scrape')
-
-        # Leave connection open, see if helps resolve the connection issues
-        #self.close()
-
-        ## vr002
-        if self.inverter_config.get('use_local_time',False):
-            self.latest_scrape["timestamp"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            logging.debug(f'Using Local Computer Time: {self.latest_scrape.get("timestamp")}')       
-            del self.latest_scrape["year"]
-            del self.latest_scrape["month"]
-            del self.latest_scrape["day"]
-            del self.latest_scrape["hour"]
-            del self.latest_scrape["minute"]
-            del self.latest_scrape["second"]
+    def persist_registers_from_previous_scrape(self):
+        # some custom registers are derived using values from the current and - if available - the previous scrape.
+        # Conserve any previous values already existing or initialize if not yet present.
+        if not self.inverter_config['disable_custom_registers']:
+            persist_registers = {
+                "run_state":                self.latest_scrape.get("run_state","ON"),
+                "last_reset":               self.latest_scrape.get("last_reset",""),
+                "daily_export_to_grid":     self.latest_scrape.get("daily_export_to_grid",0),
+                "daily_import_from_grid":   self.latest_scrape.get("daily_import_from_grid",0),
+            }
         else:
+            persist_registers = None
+
+        return persist_registers
+
+
+    def convert_alarm_time_fields_to_timestamp(self):
+        if self.latest_scrape.get("pid_alarm_code"):
             try:
-                self.latest_scrape["timestamp"] = "%s-%s-%s %s:%02d:%02d" % (
-                    self.latest_scrape["year"],
-                    self.latest_scrape["month"],
-                    self.latest_scrape["day"],
-                    self.latest_scrape["hour"],
-                    self.latest_scrape["minute"],
-                    self.latest_scrape["second"],
-                )
-                logging.debug(f'Using Inverter Time: {self.latest_scrape.get("timestamp")}')       
-                del self.latest_scrape["year"]
-                del self.latest_scrape["month"]
-                del self.latest_scrape["day"]
-                del self.latest_scrape["hour"]
-                del self.latest_scrape["minute"]
-                del self.latest_scrape["second"]
-            except Exception:
-                self.latest_scrape["timestamp"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                logging.warning(f'Failed to get Timestamp from Inverter, using Local Time: {self.latest_scrape.get("timestamp")}')       
-                del self.latest_scrape["year"]
-                del self.latest_scrape["month"]
-                del self.latest_scrape["day"]
-                del self.latest_scrape["hour"]
-                del self.latest_scrape["minute"]
-                del self.latest_scrape["second"]
-                pass
-
-        # If alarm state exists then convert to timestamp, otherwise remove it
-        try:
-            if self.latest_scrape["pid_alarm_code"]:
                 self.latest_scrape["alarm_timestamp"] = "%s-%s-%s %s:%02d:%02d" % (
-                    self.latest_scrape["alarm_time_year"],
-                    self.latest_scrape["alarm_time_month"],
-                    self.latest_scrape["alarm_time_day"],
-                    self.latest_scrape["alarm_time_hour"],
-                    self.latest_scrape["alarm_time_minute"],
-                    self.latest_scrape["alarm_time_second"],
+                    self.latest_scrape["alarm_time_year"], self.latest_scrape["alarm_time_month"], self.latest_scrape["alarm_time_day"],
+                    self.latest_scrape["alarm_time_hour"], self.latest_scrape["alarm_time_minute"], self.latest_scrape["alarm_time_second"],
                 )   
-            del self.latest_scrape["alarm_time_year"]
-            del self.latest_scrape["alarm_time_month"]
-            del self.latest_scrape["alarm_time_day"]
-            del self.latest_scrape["alarm_time_hour"]
-            del self.latest_scrape["alarm_time_minute"]
-            del self.latest_scrape["alarm_time_second"]
-        except Exception:
-            pass
+            except Exception:
+                self.latest_scrape["alarm_timestamp"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                logging.exception(f"Converting fields for alarm time into timestamp failed! Substituting values from inverter by local timestamp.")
+            finally:
+                for field in ["alarm_time_year", "malarm_time_onth", "alarm_time_day", "alarm_time_hour", "alarm_time_minute", "alarm_time_second"]:
+                    if field in self.latest_scrape:
+                        del self.latest_scrape[field]
 
-        ### Custom Registers
-        ######################
 
+    def convert_time_fields_to_timestamp(self):
+        # A timestamp is delivered in 6 distinct time fields by the inverter, create a timestamp from these values.
+        ## vr002
+        try:
+            if self.inverter_config.get('use_local_time',False):
+                self.latest_scrape["timestamp"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                logging.debug(f'Using local computer time as timestamp for scrape: {self.latest_scrape.get("timestamp")}')       
+            else:
+                try:
+                    self.latest_scrape["timestamp"] = "%s-%s-%s %s:%02d:%02d" % (
+                        self.latest_scrape["year"], self.latest_scrape["month"], self.latest_scrape["day"],
+                        self.latest_scrape["hour"], self.latest_scrape["minute"], self.latest_scrape["second"],
+                    )
+                    logging.debug(f'Using inverter time as timestamp for scrape: {self.latest_scrape.get("timestamp")}')       
+                except Exception:
+                    self.latest_scrape["timestamp"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    logging.warning(f'Failed to get timestamp from inverter, using local computer time as timestamp for scrape: {self.latest_scrape.get("timestamp")}')       
+        finally:
+            for field in ["year", "month", "day", "hour", "minute", "second"]:
+                if field in self.latest_scrape:
+                    del self.latest_scrape[field]
+
+
+    def create_custom_registers(self):
         ## vr001 - run_state
         # See if the inverter is running, This is added to inverters so can be read via MQTT etc...
         # It is also used below, as some registers hold the last value on 'stop' so we need to set to 0
@@ -545,7 +549,7 @@ class SungrowClient():
                 else:
                     self.latest_scrape["run_state"] = "OFF"
             else:
-                logging.info(f"DEBUG: Couldn't read start_stop so run_state is OFF")    
+                logging.debug(f"Couldn't read start_stop so run_state is OFF")    
                 self.latest_scrape["run_state"] = "OFF"
         except Exception:
             pass
@@ -563,7 +567,6 @@ class SungrowClient():
             self.latest_scrape["daily_export_to_grid"] = 0
             self.latest_scrape["daily_import_from_grid"] = 0
             self.latest_scrape['last_reset'] = self.latest_scrape["timestamp"]
-
         ## vr004 - import_from_grid, vr005 - export_to_grid
         # Create a registers for Power imported and exported to/from Grid
         if self.inverter_config['level'] >= 1:
@@ -609,7 +612,59 @@ class SungrowClient():
 
         self.latest_scrape["daily_import_from_grid"] += ((self.latest_scrape["import_from_grid"] / 1000) * (self.inverter_config['scan_interval'] / 60 / 60) )
 
+
+    def scrape(self):
+        logging.info(f"Start reading ranges of data from inverter.")
+        scrape_start = datetime.now()
+
+        persisted = self.persist_registers_from_previous_scrape()
+
+        # initialize the current scrape:
+        self.latest_scrape = {}
+
+        # copy the persisted values into the current scrape:
+        if persisted is not None:
+            for register, value in persisted.items():
+                self.latest_scrape[register] = value
+
+        # Note that using the value from the inverter config means that if the model has been configured, it will actually never be read from the inverter:
+        self.latest_scrape['device_type_code'] = self.inverter_config['model']
+
+        load_registers_count = 0
+        load_registers_failed = 0
+
+        scraper_ranges = self.register_ranges
+        # Use a dynamically compiled list of address ranges instead of the configured one, if the dyna_scan option has been enabled:
+        if self.inverter_config['dyna_scan']:
+            scraper_ranges = self.build_dyna_scan_address_ranges()
+
+        for range in scraper_ranges:
+            load_registers_count +=1
+            logging.debug(f'Reading data, type ´{range.get("type")}`, range ´{range.get("start")}:{range.get("range")}`')
+            if not self.load_registers(range.get('type'), int(range.get('start')), int(range.get('range'))):
+                load_registers_failed +=1
+        if load_registers_failed == load_registers_count:
+            # If every scrape fails, disconnect the client
+            #logging.warning
+            self.disconnect()
+            return False
+        if load_registers_failed > 0:
+            logging.warning(f'Reading: Failed to read some ranges ({load_registers_failed} of {load_registers_count})!')
+
+        # Leave connection open, see if helps resolve the connection issues
+        #self.close()
+
+        self.convert_time_fields_to_timestamp()
+
+        # If alarm state exists then convert to timestamp, otherwise remove it
+        self.convert_alarm_time_fields_to_timestamp()
+
+        # derive custom registers from scraped values if required:
+        if not self.inverter_config.get('disable_custom_registers'):
+            self.create_custom_registers()
+
         scrape_end = datetime.now()
-        logging.info(f'Inverter: Successfully scraped in {(scrape_end - scrape_start).seconds}.{(scrape_end - scrape_start).microseconds} secs')
+        logging.info(f'Finished reading ranges of data from inverter in {(scrape_end - scrape_start).seconds}.{(scrape_end - scrape_start).microseconds} seconds.')
 
         return True
+
