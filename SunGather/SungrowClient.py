@@ -38,14 +38,17 @@ class SungrowClient():
         
         self.registers = [[]]
         self.registers.pop() # Remove null value from list
-        self.registers_custom = [   {'name': 'run_state', 'address': 'vr001'},
-                                    {'name': 'timestamp', 'address': 'vr002'},
-                                    {'name': 'last_reset', 'address': 'vr003'},
-                                    {'name': 'export_to_grid', 'unit': 'W', 'address': 'vr004'}, 
-                                    {'name': 'import_from_grid', 'unit': 'W', 'address': 'vr005'}, 
-                                    {'name': 'daily_export_to_grid', 'unit': 'kWh', 'address': 'vr006'}, 
-                                    {'name': 'daily_import_from_grid', 'unit': 'kWh', 'address': 'vr007'}
-                                ]
+        if not config_inverter.get('disable_custom_registers'):
+            self.registers_custom = [   {'name': 'run_state', 'address': 'vr001'},
+                                        {'name': 'timestamp', 'address': 'vr002'},
+                                        {'name': 'last_reset', 'address': 'vr003'},
+                                        {'name': 'export_to_grid', 'unit': 'W', 'address': 'vr004'}, 
+                                        {'name': 'import_from_grid', 'unit': 'W', 'address': 'vr005'}, 
+                                        {'name': 'daily_export_to_grid', 'unit': 'kWh', 'address': 'vr006'}, 
+                                        {'name': 'daily_import_from_grid', 'unit': 'kWh', 'address': 'vr007'}
+                                    ]
+        else:
+            self.registers_custom = []
 
         self.register_ranges = [[]]
         self.register_ranges.pop() # Remove null value from list
