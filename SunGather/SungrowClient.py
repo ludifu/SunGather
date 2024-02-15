@@ -51,7 +51,8 @@ class SungrowClient():
 
     def connect(self):
         if self.client:
-            try: self.client.connect()
+            try:
+                self.client.connect()
             except:
                 return False
             return
