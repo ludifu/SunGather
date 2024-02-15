@@ -55,8 +55,7 @@ class SungrowClient():
                 self.client.connect()
             except:
                 return False
-            return
-                True
+            return True
 
         if self.inverter_config['connection'] == "http":
             self.client_config['port'] = '8082'
