@@ -255,9 +255,10 @@ class SungrowClient():
         return True
 
 
-    def load_registers(self, register_type, start, count=100):
+    # read and return an address range beginning with start and with count registers from the inverter.
+    def read_input_registers(self, register_type, start, count):
         try:
-            logging.debug(f'load_registers: {register_type}, {start}:{count}')
+            logging.debug(f'read_input_registers: {register_type}, {start}:{count}')
             if register_type == "read":
                 rr = self.client.read_input_registers(start,count=count, unit=self.inverter_config['slave'])
             elif register_type == "hold":
@@ -265,84 +266,124 @@ class SungrowClient():
             else:
                 raise RuntimeError(f"Unsupported register type: {type}")
         except Exception as err:
-            logging.warning(f"No data returned for {register_type}, {start}:{count}")
-            logging.debug(f"{str(err)}')")
-            return False
+            logging.warning(f"No data returned for type ´{register_type}`, start {start}, count {count}")
+            logging.debug(f"(´{str(err)}`)")
+            return None
 
         if rr.isError():
-            logging.warning(f"Modbus connection failed")
+            logging.warning(f"Modbus connection failed!")
             logging.debug(f"{rr}")
-            return False
+            return  None
 
         if not hasattr(rr, 'registers'):
-            logging.warning("No registers returned")
-            return False
+            logging.warning("No registers returned when reading from inverter!")
+            return None
 
         if len(rr.registers) != count:
             logging.warning(f"Mismatched number of registers read {len(rr.registers)} != {count}")
+            return None
+
+        return rr
+
+
+    def interpret_value_for_register(self, rr, num, register):
+        # Convert the values delivered by the inverter into a format suitable for further work.
+
+        register_value = rr.registers[num]
+
+        # Convert unsigned to signed
+        # If xFF / xFFFF then change to 0, looks better when logging / graphing
+        if register.get('datatype') == "U16":
+            if register_value == 0xFFFF:
+                register_value = 0
+            if register.get('mask'):
+                # Filter the value through the mask.
+                register_value = 1 if register_value & register.get('mask') != 0 else 0
+        elif register.get('datatype') == "S16":
+            if register_value == 0xFFFF or register_value == 0x7FFF:
+                register_value = 0
+            if register_value >= 32767:  # Anything greater than 32767 is a negative for 16bit
+                register_value = (register_value - 65536)
+        elif register.get('datatype') == "U32":
+            u32_value = rr.registers[num+1]
+            if register_value == 0xFFFF and u32_value == 0xFFFF:
+                register_value = 0
+            else:
+                register_value = (register_value + u32_value * 0x10000)
+        elif register.get('datatype') == "S32":
+            u32_value = rr.registers[num+1]
+            if register_value == 0xFFFF and (u32_value == 0xFFFF or u32_value == 0x7FFF):
+                register_value = 0
+            elif u32_value >= 32767:  # Anything greater than 32767 is a negative
+                register_value = (register_value + u32_value * 0x10000 - 0xffffffff -1)
+            else:
+                register_value = register_value + u32_value * 0x10000
+        elif register.get('datatype') == "UTF-8": # This seems to be Serial only
+            utf_value = register_value.to_bytes(2, 'big')
+            # Use attribute ´length` if configured for the UTF-8 attribute, otherwise assume 10 registers (20 characters), rr.registers[num] .. rr.registers[num+9].
+            # According to an issue registered with bohdan-s/SunGather the serial is actually up to 11 characters, not 10.
+            # https://github.com/bohdan-s/SunGather/issues/118
+            # Note:
+            # (a) Any UTF-8 attribute LONGER than 10 registers would be truncated, unless it has its length correctly configured as an attribute.
+            # (b) Any UTF-8 attribute SHORTER than 10 registers will probably either contain garbage after its regular length or the reading
+            #     may fail altogether if reading from rr exceeds the length of rr ...
+            # (c) Version V1.0.23 of the Sungrow Specification ´Communication Protocol of Residential Hybrid Inverter` contains 3 UTF-8 registers
+            #     with 10 (serial_number) and 15 (arm_software-version and dsp_software_version) characters.
+            for x in range(1, register.get('length', 10-1)):
+                utf_value += rr.registers[num+x].to_bytes(2, 'big')
+            register_value = utf_value.decode()
+
+        # Some registers contain one out of a range of specific values (effectivly an enumeration). These values are often simply
+        # coded as hex values. For example in the register ´device_type_code` an inverter model ´SH8.0RT` is represented by the
+        # value 0xE02. Such code are replaced by their corresponding values:
+        if register.get('datarange'):
+            match = False
+            for value in register.get('datarange'):
+                if value['response'] == rr.registers[num] or value['response'] == register_value:
+                    register_value = value['value']
+                    match = True
+            if not match:
+                default = register.get('default')
+                logging.debug(f"No matching value for {register_value} in datarange of {register_name}, using default {default}.")
+                register_value = default
+
+        # The inverter does not have floating or fixed point numbers available. To deliver values with decimals these are multiplied
+        # by factors of 10. For example a value of 50.4 degrees in the register ´internal_temperature` is represented as a value of 504.
+        # Such values are converted to correct floating point values.
+        if register.get('accuracy'):
+            register_value = round(register_value * register.get('accuracy'), 2)
+
+        return register_value
+
+
+    def load_registers(self, register_type, start, count=100):
+        logging.info(f"Start reading a single range of data, type ´{register_type}`, start {start}, count {count}.")
+
+        # first read the data area containing the registers from the inverter.
+        rr = self.read_input_registers(register_type, start, count)
+        if rr is None:
             return False
 
+        # for each address in the range check which registers they contain and extract the data for the registers accordingly.
         for num in range(0, count):
             run = int(start) + num + 1
 
             for register in self.registers:
+                # skip register, if it is not yet time to read it:
+                if register.get("update_frequency") and register.get("last_update") and (datetime.now() - register["last_update"]).total_seconds() < register.get("update_frequency"):
+                    logging.debug(f"Skipping register {register.get('name')}, has been read within update_frequency.")
+                    continue
                 if register_type == register['type'] and register['address'] == run:
-                    register_name = register['name']
-
-                    register_value = rr.registers[num]
-
-                    # Convert unsigned to signed
-                    # If xFF / xFFFF then change to 0, looks better when logging / graphing
-                    if register.get('datatype') == "U16":
-                        if register_value == 0xFFFF:
-                            register_value = 0
-                        if register.get('mask'):
-                            # Filter the value through the mask.
-                            register_value = 1 if register_value & register.get('mask') != 0 else 0
-                    elif register.get('datatype') == "S16":
-                        if register_value == 0xFFFF or register_value == 0x7FFF:
-                            register_value = 0
-                        if register_value >= 32767:  # Anything greater than 32767 is a negative for 16bit
-                            register_value = (register_value - 65536)
-                    elif register.get('datatype') == "U32":
-                        u32_value = rr.registers[num+1]
-                        if register_value == 0xFFFF and u32_value == 0xFFFF:
-                            register_value = 0
-                        else:
-                            register_value = (register_value + u32_value * 0x10000)
-                    elif register.get('datatype') == "S32":
-                        u32_value = rr.registers[num+1]
-                        if register_value == 0xFFFF and (u32_value == 0xFFFF or u32_value == 0x7FFF):
-                            register_value = 0
-                        elif u32_value >= 32767:  # Anything greater than 32767 is a negative
-                            register_value = (register_value + u32_value * 0x10000 - 0xffffffff -1)
-                        else:
-                            register_value = register_value + u32_value * 0x10000
-                    elif register.get('datatype') == "UTF-8": # This seems to be Serial only, 10 bytes
-                        utf_value = register_value.to_bytes(2, 'big')
-                        for x in range(1,5):
-                            utf_value += rr.registers[num+x].to_bytes(2, 'big')
-                        register_value = utf_value.decode()
-
-
-                    # We convert a system response to a human value 
-                    if register.get('datarange'):
-                        match = False
-                        for value in register.get('datarange'):
-                            if value['response'] == rr.registers[num] or value['response'] == register_value:
-                                register_value = value['value']
-                                match = True
-                        if not match:
-                            default = register.get('default')
-                            logging.debug(f"No matching value for {register_value} in datarange of {register_name}, using default {default}")
-                            register_value = default
-
-                    if register.get('accuracy'):
-                        register_value = round(register_value * register.get('accuracy'), 2)
+                    register_value = self.interpret_value_for_register(self, rr, num, register)
+                    # remember the last update timestamp in the register, if the register has an individual update_frequency configured:
+                    if register.get("update_frequency"):
+                        register.put("last_update", timedate.now())
 
                     # Set the final register value with adjustments above included 
                     self.latest_scrape[register_name] = register_value
+        logging.info(f"Finished reading a single range of data.")
         return True
+
 
     def validateRegister(self, check_register):
         for register in self.registers:
