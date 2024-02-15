@@ -52,8 +52,10 @@ class SungrowClient():
     def connect(self):
         if self.client:
             try: self.client.connect()
-            except: return False
-            return True
+            except:
+                return False
+            return
+                True
 
         if self.inverter_config['connection'] == "http":
             self.client_config['port'] = '8082'
@@ -67,8 +69,10 @@ class SungrowClient():
             return False
         logging.info("Connection: " + str(self.client))
 
-        try: self.client.connect()
-        except: return False
+        try:
+            self.client.connect()
+        except:
+            return False
 
         time.sleep(3)       # Wait 3 seconds, fixes timing issues
         return True
@@ -88,13 +92,17 @@ class SungrowClient():
 
     def close(self):
         logging.info("Closing Session: " + str(self.client))
-        try: self.client.close()
-        except: pass
+        try:
+            self.client.close()
+        except:
+            pass
 
     def disconnect(self):
         logging.info("Disconnecting: " + str(self.client))
-        try: self.client.close()
-        except: pass
+        try:
+            self.client.close()
+        except:
+            pass
         self.client = None
 
     def configure_registers(self,registersfile):
