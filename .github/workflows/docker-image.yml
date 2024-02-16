@@ -27,10 +27,19 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Build and push
+      - name: Build and push latest
         uses: docker/build-push-action@v5
+        if: ${{ github.ref_type == 'branch' }}
         with:
           context: .
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/sungather:${{ steps.version.outputs.tag }},${{ secrets.DOCKERHUB_USERNAME }}/sungather:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/sungather:latest
+      - name: Build and push tagged
+        uses: docker/build-push-action@v5
+        if: ${{ github.ref_type == 'tag' }}
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/sungather:${{ github.ref_name }}
