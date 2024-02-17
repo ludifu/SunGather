@@ -43,9 +43,9 @@ def main():
     print("| {:<42} | {:^5} | {:<4} | {:<5} | {:<5} |{:^3}|".format('register name', 'unit', 'type', 'freq.', 'addr', 'lvl'))
     print(f"+--------------------------------------------+-------+------+-------+-------+---+")
     for reg in register_configuration['registers'][0]['read']:
-        print("| {:<42} | {:^5} | {:<4} | {:>5} | {:>5} |{:^3}|".format(reg.get("name"), reg.get("unit", ""), "read", reg.get("update_frequency", ""), reg.get("address","-----"), reg.get("level")))
+        print("| {:<42} | {:^5} | {:<4} | {:>5} | {:>5} |{:^3}|".format(reg.get("name"), reg.get("unit", ""), "read", reg.get("update_frequency", ""), reg.get("address","-----"), reg.get("level","-")))
     for reg in register_configuration['registers'][1]["hold"]:
-        print("| {:<42} | {:^5} | {:<4} | {:>5} | {:>5} |{:^3}|".format(reg.get("name"), reg.get("unit", ""), "hold", reg.get("update_frequency", ""), reg.get("address","-----"), reg.get("level")))
+        print("| {:<42} | {:^5} | {:<4} | {:>5} | {:>5} |{:^3}|".format(reg.get("name"), reg.get("unit", ""), "hold", reg.get("update_frequency", ""), reg.get("address","-----"), reg.get("level","-")))
     print(f"+--------------------------------------------+-------+------+-------+-------+---+")
 
     # Setup the inverter from the configuration and establish a first connection.
