@@ -135,9 +135,10 @@ class SungrowClient():
             reg_list = registersfile['registers'][0]['read']
         else:
             reg_list = registersfile['registers'][1]['hold']
+        reg_address = None
         for register in reg_list:
             if register.get('name') == reg_name:
-                reg_address = register['address']
+                reg_address = register.get('address')
                 reg_len = self.register_length(register)
                 register['type'] = reg_type
                 self.registers.append(register)

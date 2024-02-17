@@ -131,6 +131,22 @@ def load_registers(registersfilename):
     except Exception as err:
         logging.error(f"Failed: Loading registers: {registersfilename}  {err}")
         sys.exit(f"Failed: Loading registers: {registersfilename} {err}")
+
+    # Full validation of the registers yaml syntax is rather scope of
+    # implementing a schema.
+
+    # These checks are to allow empty lists of read and hold sections within
+    # registers and scan. If these are empty in the yaml there will not be an
+    # empty list. This is substituted here.
+
+    if registersfile["registers"][0].get("read") is None:
+        registersfile["registers"][0]["read"] = []
+    if registersfile["registers"][1].get("hold") is None:
+        registersfile["registers"][1]["hold"] = []
+    if registersfile["scan"][0].get("read") is None:
+        registersfile["scan"][0]["read"] = []
+    if registersfile["scan"][1].get("hold") is None:
+        registersfile["scan"][1]["hold"] = []
     return registersfile 
 
 
