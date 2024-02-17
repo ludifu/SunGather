@@ -158,10 +158,6 @@ def get_inverter_config(app_configuration):
 
 
 def check_config(app_configuration, inverter_configuration):
-    if not inverter_configuration.get('host'):
-        logging.critical(f"´host` option in config is required!")
-        sys.exit(1)
-
     if not inverter_configuration['log_file'] in ["OFF", "DEBUG", "INFO", "WARNING", "ERROR"]:
         logging.warning(f"log_file: Valid options are: DEBUG, INFO, WARNING, ERROR and OFF")
 
