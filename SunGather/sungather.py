@@ -11,6 +11,7 @@ import getopt
 import yaml
 import time
 import re
+import os
 
 
 def main():
@@ -38,14 +39,14 @@ def main():
     register_configuration = load_registers(app_args['registersfilename']) 
     update_register_configuration_with_frequencies(app_configuration, register_configuration)
 
-    print(f"+------------------------------------------+-------+------+-------+-------+")
-    print("| {:<40} | {:^5} | {:<4} | {:<5} | {:<5} |".format('register name', 'unit', 'type', 'freq.', 'addr'))
-    print(f"+------------------------------------------+-------+------+-------+-------+")
+    print(f"+--------------------------------------------+-------+------+-------+-------+---+")
+    print("| {:<42} | {:^5} | {:<4} | {:<5} | {:<5} |{:^3}|".format('register name', 'unit', 'type', 'freq.', 'addr', 'lvl'))
+    print(f"+--------------------------------------------+-------+------+-------+-------+---+")
     for reg in register_configuration['registers'][0]['read']:
-        print("| {:<40} | {:^5} | {:<4} | {:>5} | {:>5} |".format(reg.get("name"), reg.get("unit", ""), "read", reg.get("update_frequency", ""), reg.get("address","-----")))
+        print("| {:<42} | {:^5} | {:<4} | {:>5} | {:>5} |{:^3}|".format(reg.get("name"), reg.get("unit", ""), "read", reg.get("update_frequency", ""), reg.get("address","-----"), reg.get("level")))
     for reg in register_configuration['registers'][1]["hold"]:
-        print("| {:<40} | {:^5} | {:<4} | {:>5} | {:>5} |".format(reg.get("name"), reg.get("unit", ""), "hold", reg.get("update_frequency", ""), reg.get("address","-----")))
-    print(f"+------------------------------------------+-------+------+-------+-------+")
+        print("| {:<42} | {:^5} | {:<4} | {:>5} | {:>5} |{:^3}|".format(reg.get("name"), reg.get("unit", ""), "hold", reg.get("update_frequency", ""), reg.get("address","-----"), reg.get("level")))
+    print(f"+--------------------------------------------+-------+------+-------+-------+---+")
 
     # Setup the inverter from the configuration and establish a first connection.
     inverter = setup_inverter(inverter_configuration, register_configuration)
@@ -135,7 +136,7 @@ def load_registers(registersfilename):
 
 def get_inverter_config(app_configuration):
     config_inverter = {
-        "host": app_configuration['inverter'].get('host',None),
+        "host": app_configuration['inverter'].get('host',"localhost"),
         "port": app_configuration['inverter'].get('port',502),
         "timeout": app_configuration['inverter'].get('timeout',10),
         "retries": app_configuration['inverter'].get('retries',3),
@@ -317,6 +318,8 @@ def setup_log_levels_and_log_file(loglevel, logfolder, lvl_file, lvl_console):
 
     # file logging
     if not lvl_file == "OFF":
+        if not os.path.exists(logfolder):
+            os.makedirs(logfolder)
         logfile = logfolder + "SunGather.log"
         fh = logging.handlers.RotatingFileHandler(logfile, mode='w', encoding='utf-8', maxBytes=10485760, backupCount=10) # Log 10mb files, 10 x files = 100mb
         fh.formatter = logger.handlers[0].formatter
