@@ -1,4 +1,51 @@
-version:  0.2.3
+version: "0.2.3evo"
+# change log:
+#
+# 2024-02-17: version "1.0.0 evo (0.2.3)"
+
+# First version in the SunGatherEvo fork, own versioning. The version number this file was forked off is "0.2.3". This version mainly contains changes to adapt to Sungrow Specification ´Communication Protocol of Residential Hybrid Inverter` V1.1.2
+
+# Changed registers:
+#
+# - register device_type_code: Added all supported devices according to specification, appendix 4.6
+#
+# - added more states to register 13000 / system_state. Also changed code 0x0002 to 0x0000 for state "Running" (according to Specification). Code 0x0002 was also already used for "shutdown (which is correct according to Specification). Probably this was a typo ...
+#
+# - Added all supported models according to specification to the register 13001 / running_state.
+
+# Added registers (addresses in parentheses):
+ 
+# - battery_power_wide_range (5214)
+# - backup_a_phase_current (5720), backup_b_phase_current (5721), backup_c_phase_current (5722)
+# - backup_a_phase_voltage (5731), backup_b_phase_voltage (5732), backup_c_phase_voltage (5733)
+# - battery_capacity_high_precision (5639)
+# - grid_frequency_high_precision (5242),
+# - battery_current_signed (5631),
+# - backup_frequency (5734)
+
+# Added state registers derived from the register system_state (address 13001).
+# These have values of either 1 or 0, indicating 1 as true, 0 as false. The
+# registers have the same model entry as their ancestor, running_state / 13001:
+
+# - power_flow_state_battery_charging
+# - power_flow_state_battery_discharging
+# - power_flow_state_feed_into_grid
+# - power_flow_state_import_from_grid
+# - power_flow_state_load_active
+# - power_flow_state_power_generated_from_load
+# - power_flow_state_power_generated_from_pv
+
+# All new registers have the following models supported. These are those that
+# are listed in the specification plus the SH4.6RS model which is not listed
+# but was existing in this file before:
+
+# models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
+ 
+# Limitations
+
+# No updates or changes regarding other series of inverters.
+
+################################################################################################
 vendor: Sungrow
 registers:
   - read:
@@ -177,14 +224,36 @@ registers:
           value: "SH4K6-30"
         - response: 0xD0F
           value: "SH5.0RS"
+        - response: 0xD17
+          value: "SH3.0RS"
         - response: 0xD0D
           value: "SH3.6RS"
+        - response: 0xD18
+          value: "SH4.0RS"
         - response: 0xD0E
           value: "SH4.6RS"
         - response: 0xD10
           value: "SH6.0RS"
+        - response: 0xD1A
+          value: "SH8.0RS"
+        - response: 0xD1B
+          value: "SH10RS"
         - response: 0xE03
           value: "SH10RT"
+        - response: 0xE10
+          value: "SH5.0RT-20"
+        - response: 0xE11
+          value: "SH6.0RT-20"
+        - response: 0xE12
+          value: "SH8.0RT-20"
+        - response: 0xE13
+          value: "SH10RT-20"
+        - response: 0xE0C
+          value: "SH5.0RT-V112"
+        - response: 0xE0D
+          value: "SH6.0RT-V112"
+        - response: 0xE0E
+          value: "SH8.0RT-V112"
         - response: 0xE0F
           value: "SH10RT-V112"
         - response: 0xE02
@@ -193,6 +262,31 @@ registers:
           value: "SH6.0RT"
         - response: 0xE00
           value: "SH5.0RT"
+        - response: 0xE08
+          value: "SH5.0RT-V122"
+        - response: 0xE09
+          value: "SH6.0RT-V122"
+        - response: 0xE0A
+          value: "SH8.0RT-V122"
+        - response: 0xE0B
+          value: "SH10RT-V122"
+        # SH5-25T series:
+        - response: 0xE20
+          value: "SH5T-V11"
+        - response: 0xE21
+          value: "SH6T-V11"
+        - response: 0xE22
+          value: "SH8T-V11"
+        - response: 0xE23
+          value: "SH10T-V11"
+        - response: 0xE24
+          value: "SH12T-V11"
+        - response: 0xE25
+          value: "SH15T-V11"
+        - response: 0xE26
+          value: "SH20T-V11"
+        - response: 0xE28
+          value: "SH25T-V11"
       # G2 Inverters
         - response: 0x122
           value: "SG3K-D"
@@ -802,6 +896,12 @@ registers:
 #   - name: "Reserved"    
 #     address: 5152
 #     datatype: "U16"
+    - name: "battery_power_wide_range"
+      level: 2
+      address: 5214
+      datatype: "S32"
+      unit: "W"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
     # Following 2 registers are not in the documentation, but other projects are using them
     - name: "export_power"
       level: 2
@@ -817,6 +917,14 @@ registers:
       models: ["SG30KTL","SG10KTL","SG12KTL","SG15KTL","SG20KTL","SG30KU","SG36KTL","SG36KU","SG40KTL","SG40KTL-M","SG50KTL-M","SG60KTL-M","SG60KU","SG30KTL-M","SG30KTL-M-V31","SG33KTL-M","SG36KTL-M","SG33K3J","SG49K5J","SG34KJ","LP_P34KSG","SG50KTL-M-20","SG60KTL","SG80KTL","SG80KTL-20","SG60KU-M","SG5KTL-MT","SG6KTL-MT","SG8KTL-M","SG10KTL-M","SG10KTL-MT","SG12KTL-M","SG15KTL-M","SG17KTL-M","SG20KTL-M","SG80KTL-M","SG111HV","SG125HV","SG125HV-20","SG30CX","SG33CX","SG36CX-US","SG40CX","SG50CX","SG60CX-US","SG110CX","SG250HX","SG250HX-US","SG100CX","SG100CX-JP","SG250HX-IN","SG25CX-SA","SG75CX","SG3.0RT","SG4.0RT","SG5.0RT","SG4.0RS","SG5.0RS","SG6.0RT","SG7.0RT","SG8.0RT","SG8.0RS","SG10RT","SG12RT","SG15RT","SG17RT","SG20RT"]
 #   - name: "Reserved"    
 #     address: 5153-7012
+#
+    - name: "grid_frequency_high_precision"
+      level: 2
+      address: 5242
+      datatype: "U16"
+      unit: "Hz"
+      accuracy: 0.01
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
 ##### Residential Hybrid Inverters only START
     #https://www.photovoltaikforum.com/thread/166134-daten-lesen-vom-sungrow-wechselrichtern-modbus/?pageNo=13
     - name: "meter_power"
@@ -865,6 +973,13 @@ registers:
       accuracy: 100
       unit: "W"
       models: ["SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "battery_current_signed"
+      level: 2
+      address: 5631
+      datatype: "S16"
+      accuracy: 0.1
+      unit: "A"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
     - name: "bms_max_charging_current"
       level: 2
       address: 5635
@@ -877,6 +992,34 @@ registers:
       datatype: "U16"
       unit: "A"
       models: ["SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "battery_capacity_high_precision"
+      level: 2
+      address: 5639
+      datatype: "U16"
+      unit: "kWh"
+      accuracy: 0.01
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
+    - name: "backup_a_phase_current"
+      level: 2
+      address: 5720
+      datatype: "S16"
+      accuracy: 0.1
+      unit: "A"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
+    - name: "backup_b_phase_current"
+      level: 2
+      address: 5721
+      datatype: "S16"
+      accuracy: 0.1
+      unit: "A"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
+    - name: "backup_c_phase_current"
+      level: 2
+      address: 5722
+      datatype: "S16"
+      accuracy: 0.1
+      unit: "A"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
     #https://www.photovoltaikforum.com/thread/166134-daten-lesen-vom-sungrow-wechselrichtern-modbus/?pageNo=13
     - name: "backup_power"
       level: 2
@@ -903,6 +1046,34 @@ registers:
       datatype: "S32"
       unit: "W"
       models: ["SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+    - name: "backup_a_phase_voltage"
+      level: 2
+      address: 5731
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "V"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
+    - name: "backup_b_phase_voltage"
+      level: 2
+      address: 5732
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "V"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
+    - name: "backup_c_phase_voltage"
+      level: 2
+      address: 5733
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "V"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
+    - name: "backup_frequency"
+      level: 2
+      address: 5734
+      datatype: "U16"
+      accuracy: 0.01
+      unit: "Hz"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
     - name: "pv_power_of_today"
       level: 1
       address: 6100
@@ -1476,8 +1647,14 @@ registers:
       address: 13000
       datatype: "U16"
       datarange:
-        - response: 0x0002
+        - response: 0x0000
+          value: "Run"
+        - response: 0x0001
           value: "Stop"
+        - response: 0x0002
+          value: "Shutdown"
+        - response: 0x0004
+          value: "Emergency Stop"
         - response: 0x0008
           value: "Standby"
         - response: 0x0010
@@ -1486,25 +1663,103 @@ registers:
           value: "Startup"
         - response: 0x0040
           value: "Run"
+        - response: 0x0041
+          value: "Off-grid Charge"
         - response: 0x0100
           value: "Fault"
+        - response: 0x0200
+          value: "Update Failed"
         - response: 0x0400
           value: "Maintain Run"
         - response: 0x0800
           value: "Forced Run"
         - response: 0x1000
           value: "Off-grid Run"
+        - response: 0x1111
+          value: "Uninitialized"
+        - response: 0x1300
+          value: "Shutdown"
+        - response: 0x1400
+          value: "Standby"
+        - response: 0x1500
+          value: "Emergency Stop"
+        - response: 0x1600
+          value: "Startup"
+        - response: 0x1700
+          value: "AFCI self-test shutdown"
+        - response: 0x1800
+          value: "Intelligent Station Building Status"
+        - response: 0x1900
+          value: "Safe Mode"
+        - response: 0x2000
+          value: "Open loop"
         - response: 0x2501
           value: "Restarting"
         - response: 0x4000
           value: "EMS Run"
+        - response: 0x4001
+          value: "Emergency Charging Operation"
+        - response: 0x8000
+          value: "Stop"
+        - response: 0x8100
+          value: "Derating Running"
+        - response: 0x8200
+          value: "Dispatch Running"
+        - response: 0x9100
+          value: "Warn Run"
+        - response: 0x12000
+          value: "Initial standby"
+        - response: 0x55000
+          value: "Fault"
       default: "Unknown"
       models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
     - name: "running_state"
       level: 2
       address: 13001
       datatype: "U16"
-      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH5.0RS","SH3.6RS","SH4.6RS","SH6.0RS","SH10RT","SH10RT-V112","SH8.0RT","SH6.0RT","SH5.0RT"]
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
+    - name: "power_flow_state_power_generated_from_pv"
+      level: 2
+      address: 13001
+      datatype: "U16"
+      mask: 1
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
+    - name: "power_flow_state_battery_charging"
+      level: 2
+      address: 13001
+      datatype: "U16"
+      mask: 2
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
+    - name: "power_flow_state_battery_discharging"
+      level: 2
+      address: 13001
+      datatype: "U16"
+      mask: 4
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
+    - name: "power_flow_state_load_active"
+      level: 2
+      address: 13001
+      datatype: "U16"
+      mask: 8
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
+    - name: "power_flow_state_feed_into_grid"
+      level: 2
+      address: 13001
+      datatype: "U16"
+      mask: 16
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
+    - name: "power_flow_state_import_from_grid"
+      level: 2
+      address: 13001
+      datatype: "U16"
+      mask: 32
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
+    - name: "power_flow_state_power_generated_from_load"
+      level: 2
+      address: 13001
+      datatype: "U16"
+      mask: 128
+      models: ["SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30","SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
     - name: "state_power_generated_from_pv"
       level: 2
       address: 13001
