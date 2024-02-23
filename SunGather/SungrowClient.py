@@ -4,6 +4,8 @@ from SungrowModbusTcpClient import SungrowModbusTcpClient
 from SungrowModbusWebClient import SungrowModbusWebClient
 from pymodbus.client.sync import ModbusTcpClient
 
+from DerivedRegisters import DerivedRegisters
+
 from datetime import datetime
 
 import logging
@@ -225,8 +227,9 @@ class SungrowClient():
 
 
     def build_range_list(self, registersfile):
-        # Build a list of address ranges to read from the inverter. Only address ranges are of interest which contain
-        # at least one register we are interested in.
+        # Build a list of address ranges to read from the inverter. Only
+        # address ranges are of interest which contain at least one register we
+        # are interested in.
         for register_range in registersfile['scan'][0]['read']:
             self.append_address_range_if_required(register_range, 'read')
         for register_range in registersfile['scan'][1]['hold']:
@@ -235,7 +238,8 @@ class SungrowClient():
 
 
     def append_address_range_if_required(self, reg_range, reg_type):
-        # Search for registers which are located in this address range, if any are found append the address range.
+        # Search for registers which are located in this address range, if any
+        # are found append the address range.
         range_start = reg_range.get("start")
         range_end = range_start  + reg_range.get("range")
         for register in self.registers:
@@ -254,11 +258,14 @@ class SungrowClient():
         # Determine the inverter's serial number from config or by scraping:
         self.check_serial_number(registersfile)
 
-        # Filter the registers into a list available for scraping in this installation:
+        # Filter the registers into a list available for scraping in this
+        # installation:
         self.build_register_list(registersfile)
 
-        # Filter the list of address areas to read from the inverter to those which contain available registers:
+        # Filter the list of address areas to read from the inverter to those
+        # which contain available registers:
         self.build_range_list(registersfile)
+
         return True
 
 
@@ -294,7 +301,9 @@ class SungrowClient():
 
 
     def interpret_value_for_register(self, rr, num, register):
-        # Convert the values delivered by the inverter into a format suitable for further work.
+
+        # Convert the values delivered by the inverter into a format suitable
+        # for further work.
 
         register_value = rr.registers[num]
 
@@ -325,24 +334,39 @@ class SungrowClient():
                 register_value = (register_value + u32_value * 0x10000 - 0xffffffff -1)
             else:
                 register_value = register_value + u32_value * 0x10000
-        elif register.get('datatype') == "UTF-8": # This seems to be Serial only
+        elif register.get('datatype') == "UTF-8":
             utf_value = register_value.to_bytes(2, 'big')
-            # Use attribute ´length` if configured for the UTF-8 attribute, otherwise assume 10 registers (20 characters), rr.registers[num] .. rr.registers[num+9].
-            # According to an issue registered with bohdan-s/SunGather the serial is actually up to 11 characters, not 10.
-            # https://github.com/bohdan-s/SunGather/issues/118
-            # Note:
-            # (a) Any UTF-8 attribute LONGER than 10 registers would be truncated, unless it has its length correctly configured as an attribute.
-            # (b) Any UTF-8 attribute SHORTER than 10 registers will probably either contain garbage after its regular length or the reading
-            #     may fail altogether if reading from rr exceeds the length of rr ...
-            # (c) Version V1.0.23 of the Sungrow Specification ´Communication Protocol of Residential Hybrid Inverter` contains 3 UTF-8 registers
-            #     with 10 (serial_number) and 15 (arm_software-version and dsp_software_version) characters.
+
+            # Use attribute ´length` if configured for the UTF-8 attribute,
+            # otherwise assume 10 registers (20 characters), rr.registers[num]
+            # .. rr.registers[num+9].
+
+            # Notes:
+
+            # (a) Any UTF-8 attribute LONGER than 10 registers would be
+            # truncated, unless it has its length correctly configured as an
+            # attribute.
+
+            # (b) Any UTF-8 attribute SHORTER than 10 registers will probably
+            # either contain garbage after its regular length or the reading
+            # may fail altogether if reading from rr exceeds the length of rr
+            # ...
+
+            # (c) Version V1.0.23 of the Sungrow Specification ´Communication
+            # Protocol of Residential Hybrid Inverter` contains 3 UTF-8
+            # registers with 10 (serial_number) and 15 (arm_software-version
+            # and dsp_software_version) characters.
+
             for x in range(1, register.get('length', 10-1)):
                 utf_value += rr.registers[num+x].to_bytes(2, 'big')
             register_value = utf_value.decode()
 
-        # Some registers contain one out of a range of specific values (effectivly an enumeration). These values are often simply
-        # coded as hex values. For example in the register ´device_type_code` an inverter model ´SH8.0RT` is represented by the
-        # value 0xE02. Such code are replaced by their corresponding values:
+        # Some registers contain one out of a range of specific values
+        # (effectivly an enumeration). These values are often simply coded as
+        # hex values. For example in the register ´device_type_code` an
+        # inverter model ´SH8.0RT` is represented by the value 0xE02. Such code
+        # are replaced by their corresponding values:
+
         if register.get('datarange'):
             match = False
             for value in register.get('datarange'):
@@ -354,9 +378,12 @@ class SungrowClient():
                 logging.debug(f"No matching value for {register_value} in datarange of {register_name}, using default {default}.")
                 register_value = default
 
-        # The inverter does not have floating or fixed point numbers available. To deliver values with decimals these are multiplied
-        # by factors of 10. For example a value of 50.4 degrees in the register ´internal_temperature` is represented as a value of 504.
-        # Such values are converted to correct floating point values.
+        # The inverter does not have floating or fixed point numbers available.
+        # To deliver values with decimals these are multiplied by factors of
+        # 10. For example a value of 50.4 degrees in the register
+        # ´internal_temperature` is represented as a value of 504.  Such values
+        # are converted to correct floating point values.
+
         if register.get('accuracy'):
             register_value = round(register_value * register.get('accuracy'), 2)
 
@@ -445,8 +472,11 @@ class SungrowClient():
 
 
     def build_dyna_scan_address_ranges(self):
-        # maximum length of an address range to read in one batch.
-        # According to pyModbusTCP documentation the maximum number of registers to read with read_input_registers() is 125.
+
+        # maximum length of an address range to read in one batch.  According
+        # to pyModbusTCP documentation the maximum number of registers to read
+        # with read_input_registers() is 125.
+
         max_range_len = 125
         ranges = []
         for reg_type in ["read", "hold"]:
@@ -505,14 +535,22 @@ class SungrowClient():
         if self.latest_scrape.get("pid_alarm_code"):
             try:
                 self.latest_scrape["alarm_timestamp"] = "%s-%s-%s %s:%02d:%02d" % (
-                    self.latest_scrape["alarm_time_year"], self.latest_scrape["alarm_time_month"], self.latest_scrape["alarm_time_day"],
-                    self.latest_scrape["alarm_time_hour"], self.latest_scrape["alarm_time_minute"], self.latest_scrape["alarm_time_second"],
+                        self.latest_scrape["alarm_time_year"],
+                        self.latest_scrape["alarm_time_month"],
+                        self.latest_scrape["alarm_time_day"],
+                        self.latest_scrape["alarm_time_hour"],
+                        self.latest_scrape["alarm_time_minute"],
+                        self.latest_scrape["alarm_time_second"],
                 )   
             except Exception:
                 self.latest_scrape["alarm_timestamp"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                logging.exception(f"Converting fields for alarm time into timestamp failed! Substituting values from inverter by local timestamp.")
+                logging.exception(f"Converting fields for alarm time into "
+                                  + "timestamp failed! Substituting values "
+                                  + "from inverter by local timestamp.")
             finally:
-                for field in ["alarm_time_year", "malarm_time_onth", "alarm_time_day", "alarm_time_hour", "alarm_time_minute", "alarm_time_second"]:
+                for field in ["alarm_time_year", "alarm_time_onth",
+                              "alarm_time_day", "alarm_time_hour",
+                              "alarm_time_minute", "alarm_time_second"]:
                     if field in self.latest_scrape:
                         del self.latest_scrape[field]
 
@@ -632,21 +670,27 @@ class SungrowClient():
             for register, value in persisted.items():
                 self.latest_scrape[register] = value
 
-        # Note that using the value from the inverter config means that if the model has been configured, it will actually never be read from the inverter:
+        # Note that using the value from the inverter config means that if the
+        # model has been configured, it will actually never be read from the
+        # inverter:
         self.latest_scrape['device_type_code'] = self.inverter_config['model']
 
         load_registers_count = 0
         load_registers_failed = 0
 
         scraper_ranges = self.register_ranges
-        # Use a dynamically compiled list of address ranges instead of the configured one, if the dyna_scan option has been enabled:
+        # Use a dynamically compiled list of address ranges instead of the
+        # configured one, if the dyna_scan option has been enabled:
         if self.inverter_config['dyna_scan']:
             scraper_ranges = self.build_dyna_scan_address_ranges()
 
         for range in scraper_ranges:
             load_registers_count +=1
-            logging.debug(f'Reading data, type ´{range.get("type")}`, range ´{range.get("start")}:{range.get("range")}`')
-            if not self.load_registers(range.get('type'), int(range.get('start')), int(range.get('range'))):
+            logging.debug(f"Reading data {load_registers_count} of {len(scraper_ranges)}, " \
+                    + f"type ´{range.get('type')}`, range ´{range.get('start')}:{range.get('range')}`")
+            if not self.load_registers(range.get('type'),
+                                       int(range.get('start')),
+                                       int(range.get('range'))):
                 load_registers_failed +=1
         if load_registers_failed == load_registers_count:
             # If every scrape fails, disconnect the client
@@ -654,7 +698,8 @@ class SungrowClient():
             self.disconnect()
             return False
         if load_registers_failed > 0:
-            logging.warning(f'Reading: Failed to read some ranges ({load_registers_failed} of {load_registers_count})!')
+            logging.warning(f'Reading: Failed to read some ranges'
+                            + "({load_registers_failed} of {load_registers_count})!")
 
         # Leave connection open, see if helps resolve the connection issues
         #self.close()
@@ -667,14 +712,21 @@ class SungrowClient():
         # derive custom registers from scraped values if required:
         if not self.inverter_config.get('disable_custom_registers'):
             self.create_custom_registers()
+            DerivedRegisters(self).calc()
 
         scrape_end = datetime.now()
-        logging.info(f'Finished reading ranges of data from inverter in {(scrape_end - scrape_start).seconds}.{(scrape_end - scrape_start).microseconds} seconds.')
+        logging.info(f'Finished reading ranges of data from inverter'
+                     + "in {(scrape_end - scrape_start).seconds}."
+                     + "{(scrape_end - scrape_start).microseconds}"
+                     + "seconds.")
 
         return True
 
 
     def print_register_list(self):
+        print(f"+-----------------------------------------------------------------+")
+        print(f"| List of registers which are read from the inverter.             |")
+        print(f"| The list is filtered according to the level and model support.  |")
         print(f"+------------------------------------------+-------+------+-------+")
         print("| {:<40} | {:^5} | {:<4} | {:<5} |".format('register name', 'unit', 'type', 'freq.'))
         print(f"+------------------------------------------+-------+------+-------+")
