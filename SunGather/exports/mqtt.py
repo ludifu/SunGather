@@ -71,8 +71,8 @@ class export_mqtt(object):
     def on_connect(self, client, userdata, flags, reason_code, properties):
         logging.info(f"MQTT: Connected to {client._host}:{client._port}")
 
-    def on_disconnect(self, client, userdata, reason_code, properties):
-        logging.info(f"MQTT: Server Disconnected code: {rc}")
+    def on_disconnect(self, client, userdata, disconnect_flags, reason_code, properties):
+        logging.info(f"MQTT: Server Disconnected code: {reason_code}")
     
     def on_publish(self, client, userdata, mid, reason_code, properties):
         try:
