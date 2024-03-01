@@ -45,22 +45,22 @@ class DerivedRegisters:
         # (self_consumption_of_day).
 
         # fail if prerequisites are missing:
-        if not "total_direct_energy_consumption" in data:
+        if not "total_direct_energy_consumption" in self.data:
             return False
-        if not "total_pv_generation" in data:
+        if not "total_pv_generation" in self.data:
             return False
 
-        if data["total_pv_generation"] <= 0:
+        if self.data["total_pv_generation"] <= 0:
             # generated energy must be > 0.
             return False
 
-        if data["total_direct_energy_consumption"] > data["total_pv_generation"]:
+        if self.data["total_direct_energy_consumption"] > self.data["total_pv_generation"]:
             # cannot have consumed more generated energy than has been generated.
             return False
 
-        data["self_consumption_total"] = (
-            data["total_direct_energy_consumption"]
-            / data["total_pv_generation"]
+        self.data["total_self_consumption"] = (
+            self.data["total_direct_energy_consumption"]
+            / self.data["total_pv_generation"]
             * 100.0
         )
         return True
@@ -74,42 +74,42 @@ class DerivedRegisters:
         # self_sufficiency_total
 
         # Check prerequisite registers
-        if not "daily_direct_energy_consumption" in data:
+        if not "daily_direct_energy_consumption" in self.data:
             return False
-        if not "daily_battery_discharge_energy" in data:
+        if not "daily_battery_discharge_energy" in self.data:
             return False
-        if not "daily_import_energy" in data:
-            return False
-
-        if not "total_direct_energy_consumption" in data:
-            return False
-        if not "total_battery_discharge_energy" in data:
-            return False
-        if not "total_import_energy" in data:
+        if not "daily_import_energy" in self.data:
             return False
 
-        data["self_sufficiency_of_today"] = (
+        if not "total_direct_energy_consumption" in self.data:
+            return False
+        if not "total_battery_discharge_energy" in self.data:
+            return False
+        if not "total_import_energy" in self.data:
+            return False
+
+        self.data["daily_self_sufficiency"] = (
             (
-                data["daily_direct_energy_consumption"]
-                + data["daily_battery_discharge_energy"]
+                self.data["daily_direct_energy_consumption"]
+                + self.data["daily_battery_discharge_energy"]
             )
             / (
-                data["daily_direct_energy_consumption"]
-                + data["daily_battery_discharge_energy"]
-                + data["daily_import_energy"]
+                self.data["daily_direct_energy_consumption"]
+                + self.data["daily_battery_discharge_energy"]
+                + self.data["daily_import_energy"]
             )
             * 100.0
         )
 
-        data["self_sufficiency_total"] = (
+        self.data["total_self_sufficiency"] = (
             (
-                data["total_direct_energy_consumption"]
-                + data["total_battery_discharge_energy"]
+                self.data["total_direct_energy_consumption"]
+                + self.data["total_battery_discharge_energy"]
             )
             / (
-                data["total_direct_energy_consumption"]
-                + data["total_battery_discharge_energy"]
-                + data["total_import_energy"]
+                self.data["total_direct_energy_consumption"]
+                + self.data["total_battery_discharge_energy"]
+                + self.data["total_import_energy"]
             )
             * 100.0
         )
@@ -125,30 +125,30 @@ class DerivedRegisters:
         # residential_consumption_of_today
         # residential_consumption_total
 
-        if not "daily_direct_energy_consumption" in data:
+        if not "daily_direct_energy_consumption" in self.data:
             return False
-        if not "daily_battery_discharge_energy" in data:
+        if not "daily_battery_discharge_energy" in self.data:
             return False
-        if not "daily_import_energy" in data:
-            return False
-
-        if not "total_direct_energy_consumption" in data:
-            return False
-        if not "total_battery_discharge_energy" in data:
-            return False
-        if not "total_import_energy" in data:
+        if not "daily_import_energy" in self.data:
             return False
 
-        data["residential_consumption_of_today"] = (
-            data["daily_direct_energy_consumption"]
-            + data["daily_battery_discharge_energy"]
-            + data["daily_import_energy"]
+        if not "total_direct_energy_consumption" in self.data:
+            return False
+        if not "total_battery_discharge_energy" in self.data:
+            return False
+        if not "total_import_energy" in self.data:
+            return False
+
+        self.data["daily_residential_consumption"] = (
+            self.data["daily_direct_energy_consumption"]
+            + self.data["daily_battery_discharge_energy"]
+            + self.data["daily_import_energy"]
         )
 
-        data["residential_consumption_total"] = (
-            data["total_direct_energy_consumption"]
-            + data["total_battery_discharge_energy"]
-            + data["total_import_energy"]
+        self.data["total_residential_consumption"] = (
+            self.data["total_direct_energy_consumption"]
+            + self.data["total_battery_discharge_energy"]
+            + self.data["total_import_energy"]
         )
 
         return True
@@ -193,47 +193,47 @@ class DerivedRegisters:
         #   This is not happening in regular operation, but limited to
         #   force load of the battery and similar situations.
 
-        if not "load_power_hybrid" in data:
+        if not "load_power_hybrid" in self.data:
             return False
-        if not "total_dc_power" in data:
+        if not "total_dc_power" in self.data:
             return False
-        if not "battery_power_wide_range" in data:
+        if not "battery_power_wide_range" in self.data:
             return False
-        if not "export_power_hybrid" in data:
+        if not "export_power_hybrid" in self.data:
             return False
 
         # Load, always positive.
-        load_power_hybrid = data["load_power_hybrid"]
+        load_power_hybrid = self.data["load_power_hybrid"]
 
         # PV power, always positive.
-        total_dc_power = data["total_dc_power"]
+        total_dc_power = self.data["total_dc_power"]
 
         # Battery power can be positive (charging) or negative (discharging).
         # The inverter delivers this value in different registers.
         #battery_power = data["battery_power"]
-        battery_power = data["battery_power_wide_range"]
+        battery_power = self.data["battery_power_wide_range"]
 
         # Grid can be positive (export) or negative (import)
-        export_power_hybrid = data["export_power_hybrid"]
+        export_power_hybrid = self.data["export_power_hybrid"]
 
         # Load will be taken with maximum priority from the PV System. The
         # power flow from PV to load is limited by total_dc_power.
 
         flow_pv_to_load = min(load_power_hybrid, total_dc_power)
-        data["flow_pv_to_load"] = flow_pv_to_load
+        self.data["flow_pv_to_load"] = flow_pv_to_load
 
         # DC power unused by the load is used to load the battery with second
         # highest priority. This value cannot be higher that the battery power.
 
         flow_pv_to_battery = min(total_dc_power - flow_pv_to_load, battery_power)
-        data["flow_pv_to_battery"] = flow_pv_to_battery
+        self.data["flow_pv_to_battery"] = flow_pv_to_battery
 
         # DC power is fed into the grid with lowest priority. This value is DC
         # power reduced by load and battery charge. The value cannot be higher
         # than the power reported at the grid connection.
 
         flow_pv_to_grid = min(total_dc_power - flow_pv_to_battery - flow_pv_to_load, export_power_hybrid)
-        data["flow_pv_to_grid"] = flow_pv_to_grid
+        self.data["flow_pv_to_grid"] = flow_pv_to_grid
 
         # Load not covere4d by DC power is with first priority retrieved form
         # the battery. The value cannot be higher that the battery power. (The
@@ -241,20 +241,20 @@ class DerivedRegisters:
         # maximum discharge power.)
 
         flow_battery_to_load = min(load_power_hybrid - flow_pv_to_load, battery_power)
-        data["flow_battery_to_load"] = flow_battery_to_load
+        self.data["flow_battery_to_load"] = flow_battery_to_load
 
         # If the load is still higher than DC power and battery discharge, the
         # gap is taken from the grid. The power taken from the grid cannot be
         # hogher than the power measured at the grid connection.
 
         flow_grid_to_load = min(load_power_hybrid - flow_pv_to_load - flow_battery_to_load, export_power_hybrid)
-        data["flow_grid_to_load"] = flow_grid_to_load
+        self.data["flow_grid_to_load"] = flow_grid_to_load
 
         # The remaining power flow between battery and grid can happen when
         # calibrating or force loading the battery form the grid.
 
-        # flow_battery_to_grid = flow_grid_to_load - flow_pv_to_grid - export_power_hybrid_all
-        flow_battery_to_grid = flow_grid_to_load - flow_pv_to_grid - export_power_hybrid_all
-        data["flow_battery_to_grid"] = flow_battery_to_grid
+        # flow_battery_to_grid = flow_grid_to_load - flow_pv_to_grid - export_power_hybrid
+        flow_battery_to_grid = flow_grid_to_load - flow_pv_to_grid - export_power_hybrid
+        self.data["flow_battery_to_grid"] = flow_battery_to_grid
 
         return True
