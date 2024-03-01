@@ -13,7 +13,6 @@ import time
 import re
 import os
 
-
 def main():
     app_args = read_arguments_from_commandline()
     app_config = load_config_file(app_args["configfilename"])
@@ -398,8 +397,8 @@ def print_register_list(register_configuration):
 # Set up the inverter.
 
 
-def setup_inverter(inverter_configuration, register_configuration):
-    inverter = SungrowClient(inverter_configuration)
+def setup_inverter(inverter_config, register_configuration):
+    inverter = SungrowClient(inverter_config)
 
     # Establish the first connection.  Note the client will return True if no
     # exception occurred in the library even if the connection could not be
@@ -409,7 +408,7 @@ def setup_inverter(inverter_configuration, register_configuration):
 
     if not inverter.connect():
         logging.critical(
-            f"Connection to inverter failed: {inverter_configuration.get('host')}:{inverter_configuration.get('port')}"
+            f"Connection to inverter failed: {inverter_config.get('host')}:{inverter_config.get('port')}"
         )
         sys.exit(1)
 
@@ -578,7 +577,7 @@ def setup_log_levels_and_log_file(loglevel, logfolder, lvl_file, lvl_console):
 
 logging.basicConfig(
     # Format log messages as for example ´2024-02-11 05:57:40 INFO     Loaded config: config.yaml`
-    format="%(asctime)s %(levelname)-8s %(message)s",
+    format="%(asctime)s %(levelname)-8s %(module)-14.14s %(message)s",
     # By default and until changed by config and / or command line arguments set level to DEBUG:
     level=logging.DEBUG,
     datefmt="%Y-%m-%d %H:%M:%S",
