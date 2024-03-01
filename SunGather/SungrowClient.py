@@ -123,8 +123,10 @@ class SungrowClient():
             reg_len = 2
         elif reg_datatype == "UTF-8":
             # If length is defined as attribute of the register, we're fine.
-            # If not use a default of 15. Rationale: As of the Sungrow specification (Hybrid) 1.0.23 the maximum length of any UTF-8 register is 15.
-            # In the worst case we read 5 registers more than required, but this should not fail.
+            # If not use a default of 15. Rationale: As of the Sungrow
+            # specification (Hybrid) 1.1.12 the maximum length of any UTF-8
+            # register is 15.  In the worst case we read 5 registers more than
+            # required, but this should not fail.
             reg_len = reg.get("length", 15)
         else:
             reg_len = 1
@@ -184,7 +186,7 @@ class SungrowClient():
         elif isinstance(result, int):
             logging.warning(f"Unknown result for serial number detected: ´{result}`.")
         else:
-            self.inverter_config['serial_numbe'] = result
+            self.inverter_config['serial_number'] = result
             logging.info(f"Serial number detected: ´{result}`.")
 
 
@@ -206,7 +208,9 @@ class SungrowClient():
 
 
     def append_register_if_available_for_reading(self, register, reg_type):
-        # register will be appended only if it is available for reading in this installation.
+        # add register to the list of registers to read.
+        # register will be appended only if it is available for reading in this
+        # installation (dependent from model, level).
         if register.get('level',3) <= self.inverter_config.get('level') or self.inverter_config.get('level') == 3:
             register['type'] = reg_type
             register.pop('level')
@@ -251,7 +255,7 @@ class SungrowClient():
                     return
 
 
-    def configure_registers(self,registersfile):
+    def configure_registers(self, registersfile):
         # Determine the inverter model from config or by scraping:
         self.check_model(registersfile)
 
@@ -352,14 +356,17 @@ class SungrowClient():
             # may fail altogether if reading from rr exceeds the length of rr
             # ...
 
-            # (c) Version V1.0.23 of the Sungrow Specification ´Communication
+            # (c) Version V1.1.12 of the Sungrow Specification ´Communication
             # Protocol of Residential Hybrid Inverter` contains 3 UTF-8
             # registers with 10 (serial_number) and 15 (arm_software-version
             # and dsp_software_version) characters.
 
             for x in range(1, register.get('length', 10-1)):
                 utf_value += rr.registers[num+x].to_bytes(2, 'big')
-            register_value = utf_value.decode()
+            utf_string = utf_value.decode()
+            # remove trailing null bytes:
+            utf_string = utf_string.rstrip("\u0000")
+            register_value = utf_string
 
         # Some registers contain one out of a range of specific values
         # (effectivly an enumeration). These values are often simply coded as
@@ -375,7 +382,7 @@ class SungrowClient():
                     match = True
             if not match:
                 default = register.get('default')
-                logging.debug(f"No matching value for {register_value} in datarange of {register_name}, using default {default}.")
+                logging.debug(f"No matching value for {register_value} in datarange of {register.get('name')}, using default {default}.")
                 register_value = default
 
         # The inverter does not have floating or fixed point numbers available.
@@ -400,22 +407,18 @@ class SungrowClient():
 
         # for each address in the range check which registers they contain and extract the data for the registers accordingly.
         for num in range(0, count):
-            run = int(start) + num + 1
-
             for register in self.registers:
-                # skip register, if it is not yet time to read it:
-                if register.get("update_frequency") and register.get("last_update") and (datetime.now() - register["last_update"]).total_seconds() < register.get("update_frequency"):
-                    logging.debug(f"Skipping register {register.get('name')}, has been read within update_frequency.")
-                    continue
-                if register_type == register['type'] and register['address'] == run:
-                    register_value = self.interpret_value_for_register(self, rr, num, register)
+                if register_type == register['type'] and register['address'] == start + 1 + num:
+                    # skip register, if it is not yet time to read it:
+                    if register.get("update_frequency") and register.get("last_update") and (datetime.now() - register["last_update"]).total_seconds() < register.get("update_frequency"):
+                        logging.debug(f"Skipping register {register.get('name')}, has been read within update_frequency.")
+                        continue
+                    register_value = self.interpret_value_for_register(rr, num, register)
                     # remember the last update timestamp in the register, if the register has an individual update_frequency configured:
                     if register.get("update_frequency"):
-                        register.put("last_update", timedate.now())
-
+                        register["last_update"] = datetime.now()
                     # Set the final register value with adjustments above included 
-                    self.latest_scrape[register_name] = register_value
-        logging.info(f"Finished reading a single range of data.")
+                    self.latest_scrape[register["name"]] = register_value
         return True
 
 
@@ -477,7 +480,7 @@ class SungrowClient():
         # to pyModbusTCP documentation the maximum number of registers to read
         # with read_input_registers() is 125.
 
-        max_range_len = 125
+        max_range_len = 100
         ranges = []
         for reg_type in ["read", "hold"]:
             # extract the registers by type because every range may only contain registers of either "hold" or "read" type.
@@ -488,10 +491,11 @@ class SungrowClient():
             range_start = 0
             timenow = datetime.now()
             for reg in regs:
-                # skip reg if it has an update frequency set and the last update has been within the configured update_frequency:
+                # skip reg if it has an update frequency set and the last update
+                # has been within the configured update_frequency:
                 if reg.get("update_frequency") and reg.get("last_update"):
                     logging.debug(f"Register {reg.get('name')} has update_frequency = {reg.get('update_frequency')} and last_update = {reg.get('last_update')}.")
-                    if (datetime.now() - reg["last_update"]).total_seconds() >= reg.get("update_frequency"):
+                    if (datetime.now() - reg["last_update"]).total_seconds() < reg.get("update_frequency"):
                         logging.debug(f"Dropping register {reg.get('name')} from dynamically build scrape range due to update frequency.")
                         continue
                 reg_addr =  reg.get("address")
@@ -504,9 +508,11 @@ class SungrowClient():
                 if reg_addr < range_start + max_range_len - (reg_len - 1):
                     range_end = reg_addr + reg_len - 1
                     continue
-                # previous register did not fit in the current range anymore. Emit current range and start a new one
+                # previous register did not fit in the current range anymore.
+                # Emit current range and start a new one
                 ranges.append({"start": range_start - 1, "range": range_end - range_start + 1, "type": reg_type})
-                range_start = 0
+                range_start = reg_addr # start a new range
+                range_end = reg_addr + reg_len - 1
             # loop finished, now complete the last open range, if one has been started:
             if range_start > 0:
                 ranges.append({"start": range_start - 1, "range": range_end - range_start + 1, "type": reg_type})
@@ -548,7 +554,7 @@ class SungrowClient():
                                   + "timestamp failed! Substituting values "
                                   + "from inverter by local timestamp.")
             finally:
-                for field in ["alarm_time_year", "alarm_time_onth",
+                for field in ["alarm_time_year", "alarm_time_month",
                               "alarm_time_day", "alarm_time_hour",
                               "alarm_time_minute", "alarm_time_second"]:
                     if field in self.latest_scrape:
@@ -564,7 +570,7 @@ class SungrowClient():
                 logging.debug(f'Using local computer time as timestamp for scrape: {self.latest_scrape.get("timestamp")}')       
             else:
                 try:
-                    self.latest_scrape["timestamp"] = "%s-%s-%s %s:%02d:%02d" % (
+                    self.latest_scrape["timestamp"] = "%04d-%02d-%02d %s:%02d:%02d" % (
                         self.latest_scrape["year"], self.latest_scrape["month"], self.latest_scrape["day"],
                         self.latest_scrape["hour"], self.latest_scrape["minute"], self.latest_scrape["second"],
                     )
@@ -699,7 +705,7 @@ class SungrowClient():
             return False
         if load_registers_failed > 0:
             logging.warning(f'Reading: Failed to read some ranges'
-                            + "({load_registers_failed} of {load_registers_count})!")
+                            + f"({load_registers_failed} of {load_registers_count})!")
 
         # Leave connection open, see if helps resolve the connection issues
         #self.close()
@@ -715,21 +721,23 @@ class SungrowClient():
             DerivedRegisters(self).calc()
 
         scrape_end = datetime.now()
-        logging.info(f'Finished reading ranges of data from inverter'
-                     + "in {(scrape_end - scrape_start).seconds}."
-                     + "{(scrape_end - scrape_start).microseconds}"
-                     + "seconds.")
+        logging.info(f'Finished reading ranges of data from inverter '
+                     + f"in {(scrape_end - scrape_start).seconds}."
+                     + f"{(scrape_end - scrape_start).microseconds}"
+                     + f"seconds.")
 
         return True
 
 
     def print_register_list(self):
-        print(f"+-----------------------------------------------------------------+")
-        print(f"| List of registers which are read from the inverter.             |")
-        print(f"| The list is filtered according to the level and model support.  |")
-        print(f"+------------------------------------------+-------+------+-------+")
-        print("| {:<40} | {:^5} | {:<4} | {:<5} |".format('register name', 'unit', 'type', 'freq.'))
-        print(f"+------------------------------------------+-------+------+-------+")
+        print(f"+-------------------------------------------------------------------------+")
+        print(f"| List of registers which are read from the inverter.                     |")
+        print(f"| The list is filtered according to the level and model support.          |")
+        print(f"+------------------------------------------+-------+------+-------+-------+")
+        print("| {:<40} | {:^5} | {:<4} | {:<5} | {:<5} |".format('register name', 'unit', 'type', 'freq.', 'addr.'))
+        print(f"+------------------------------------------+-------+------+-------+-------+")
         for reg in self.registers:
-            print("| {:<40} | {:^5} | {:<4} | {:>5} |".format(reg["name"], reg.get("unit", ""), reg["type"], reg.get("update_frequency", "")))
-        print(f"+------------------------------------------+-------+------+-------+")
+            print("| {:<40} | {:^5} | {:<4} | {:<5} | {:<5} |".format(reg.get("name"), reg.get("unit",""), reg.get("type"), reg.get("update_frequency", ""), reg.get("address", "----")))
+        print(f"+------------------------------------------+-------+------+-------+-------+")
+
+
