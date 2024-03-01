@@ -1,6 +1,8 @@
 services:
   sungather_evo:
-    build: .
+    build:
+      context: .
+      dockerfile: ./Dockerfile_watch
     container_name: sungather_evo
     command:  python sungather.py -c /config/config.yaml -r /registers/registers-sungrow.yaml -l /logs/
     volumes:
