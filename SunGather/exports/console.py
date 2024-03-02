@@ -4,16 +4,16 @@ class export_console(object):
 
     # Configure Console
     def configure(self, config, inverter):
-        print("+----------------------------------------------+")
-        print("{:<46} {:<1}".format("| " + 'Inverter Configuration Settings',"|"))
-        print("+----------------------------------------------+")
-        print("{:<20} {:<25} {:<1}".format("| " + 'Config',"| " + 'Value', "|"))
-        print("+--------------------+-------------------------+")
+        print("+--------------------------------------------------------+")
+        print("| {:^54} |".format('Inverter Configuration Settings'))
+        print("+--------------------------------------------------------+")
+        print("{:<30} {:<25} {:<1}".format("| " + 'Config',"| " + 'Value', "|"))
+        print("+------------------------------+-------------------------+")
         for setting, value in inverter.client_config.items():
-            print("{:<20} {:<25} {:<1}".format("| " + str(setting), "| " + str(value), "|"))
+            print("{:<30} {:<25} {:<1}".format("| " + str(setting), "| " + str(value), "|"))
         for setting, value in inverter.inverter_config.items():
-            print("{:<20} {:<25} {:<1}".format("| " + str(setting), "| " + str(value), "|"))
-        print("+----------------------------------------------+")
+            print("{:<30} {:<25} {:<1}".format("| " + str(setting), "| " + str(value), "|"))
+        print("+------------------------------+-------------------------+")
 
         return True
 

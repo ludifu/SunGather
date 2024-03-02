@@ -1,0 +1,26 @@
+services:
+  sungather_evo:
+    build:
+      context: .
+      dockerfile: ./Dockerfile_watch
+    container_name: sungather_evo
+    command:  python sungather.py -c /config/config.yaml -r /registers/registers-sungrow.yaml -l /logs/
+    volumes:
+      - ./logs:/logs
+    environment:
+      - TZ=Europe/Berlin
+    ports:
+      - "8080:8080"
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./SunGather
+          target: /usr/src/sungather
+        - action: sync+restart
+          path: ./config
+          target: /config
+        - action: sync+restart
+          path: ./registers
+          target: /registers
+        - action: rebuild
+          path: requirements.txt

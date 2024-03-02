@@ -1,0 +1,312 @@
+version:  1.0.0
+# 
+# Battery registers for a Sungrow Hybrid inverter.  The inverter must be
+# addressed with modbus slave id = 200 to retrieve these registers.
+
+# All registers have level 1 except those registers also available from slave
+# id 1 (like battery_voltage) which have level 2.
+
+# Model dependencies are not used.
+ 
+# Sources:
+#
+# https://www.photovoltaikforum.com/thread/166134-daten-lesen-vom-sungrow-wechselrichtern-modbus/?postID=3362875#post3362875
+# https://github.com/mkaiser/Sungrow-SHx-Inverter-Modbus-Home-Assistant/discussions/133#discussioncomment-6796246
+# https://www.photovoltaikforum.com/thread/166134-daten-lesen-vom-sungrow-wechselrichtern-modbus/?postID=3270446#post3270446
+
+# Note on register names:
+#
+#   - Registers have a prefix of "battery_" to avoid name clashes with
+#   registers retrieved from slave id 1.  If this is not sufficient registers
+#   have a suffix of ´_2xx` in addition to the prefix.
+#
+#   - If appropriate names are made similar to corresponding registers from
+#   slave id 1 to get a somewhat congruent naming.  Example: "serial_number"
+#   and "battery_serial_number", "arm_software_version" and
+#   "battery_software_version", etc.
+
+# Change log:
+#
+# 2024-02-19: initial version 1.0.0
+#
+vendor: Sungrow
+registers:
+  - read:
+    - name: "battery_serial_number"
+      level: 1
+      address: 10711
+      length: 10    # 10720 - (10711 - 1)
+      datatype: "UTF-8"
+      update_frequency: 34600 # once per hour
+
+      # Example value: ´SBRBCU-S_22011.01.19`.
+    - name: "battery_software_version"
+      level: 1
+      address: 10721
+      length: 10    # 10730 - (10721 - 1)
+      update_frequency: 34600 # once per hour
+      datatype: "UTF-8"
+
+    # Overall battery values, all of these are available from slave id 1 as well.
+    - name: "battery_voltage_2xx"
+      level: 2
+      address: 10741
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "V"
+    - name: "battery_current_2xx"
+      level: 2
+      address: 10742
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "A"
+    - name: "battery_temperature_2xx"
+      level: 2
+      address: 10743
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "°C"
+      update_frequency: 300 # once per 5 minutes
+    - name: "battery_state_of_charge"
+      level: 1
+      address: 10744
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "%"
+    # Also available from the inverter as ´battery_state_of_healthy`.
+    - name: "battery_state_of_healthy_2xx"
+      level: 2
+      address: 10745
+      datatype: "U16"
+      unit: "%"
+      update_frequency: 34600 # once per hour
+
+    - name: "battery_total_charge_energy"
+      level: 1
+      address: 10746
+      datatype: "U32"
+      unit: "kWh"
+      update_frequency: 300 # once per 5 minutes
+    - name: "battery_total_discharge_energy"
+      level: 1
+      address: 10748
+      datatype: "U32"
+      unit: "kWh"
+      update_frequency: 300 # once per 5 minutes
+
+    # Purpose / meanings of values unknown.
+    - name: "battery_status"
+      level: 2
+      address: 10750
+      datatype: "U16"
+    - name: "battery_integrity_status"
+      level: 2
+      address: 10751
+      datatype: "U16"
+
+    # maximum and minimum voltages of all cells and the respective positions of the cells with max / min voltage.
+    - name: "battery_cell_voltage_max"
+      level: 1
+      address: 10757
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "mV"
+    - name: "battery_cell_voltage_max_pos"
+      level: 1
+      address: 10758
+      datatype: "U16"
+    - name: "battery_cell_voltage_min"
+      level: 1
+      address: 10759
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "mV"
+    - name: "battery_cell_voltage_min_pos"
+      level: 1
+      address: 10760
+      datatype: "U16"
+
+    # max and min temperatures and the respective cell positions
+    - name: "battery_cell_temperature_max"
+      level: 1
+      address: 10761
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "°C"
+      update_frequency: 300 # once per 5 minutes
+    - name: "battery_cell_temperature_max_pos"
+      level: 1
+      address: 10762
+      datatype: "U16"
+      update_frequency: 300 # once per 5 minutes
+    - name: "battery_cell_temperature_min"
+      level: 1
+      address: 10763
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "°C"
+      update_frequency: 300 # once per 5 minutes
+    - name: "battery_cell_temperature_min_pos"
+      level: 1
+      address: 10764
+      datatype: "U16"
+      update_frequency: 300 # once per 5 minutes
+
+    # max and min cell voltages broken down to single modules
+    - name: "battery_cell_voltage_max_1"
+      level: 1
+      address: 10765
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "mV"
+    - name: "battery_cell_voltage_max_2"
+      level: 1
+      address: 10766
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "mV"
+    - name: "battery_cell_voltage_max_3"
+      level: 1
+      address: 10767
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "mV"
+    - name: "battery_cell_voltage_max_4"
+      level: 1
+      address: 10768
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "mV"
+    - name: "battery_cell_voltage_max_5"
+      level: 1
+      address: 10769
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "mV"
+    - name: "battery_cell_voltage_max_6"
+      level: 1
+      address: 10770
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "mV"
+    - name: "battery_cell_voltage_max_7"
+      level: 1
+      address: 10771
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "mV"
+    - name: "battery_cell_voltage_max_8"
+      level: 1
+      address: 10772
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "mV"
+
+    - name: "battery_cell_voltage_min_1"
+      level: 1
+      address: 10773
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "mV"
+    - name: "battery_cell_voltage_min_2"
+      level: 1
+      address: 10774
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "mV"
+    - name: "battery_cell_voltage_min_3"
+      level: 1
+      address: 10775
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "mV"
+    - name: "battery_cell_voltage_min_4"
+      level: 1
+      address: 10776
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "mV"
+    - name: "battery_cell_voltage_min_5"
+      level: 1
+      address: 10777
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "mV"
+    - name: "battery_cell_voltage_min_6"
+      level: 1
+      address: 10778
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "mV"
+    - name: "battery_cell_voltage_min_7"
+      level: 1
+      address: 10779
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "mV"
+    - name: "battery_cell_voltage_min_8"
+      level: 1
+      address: 10780
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "mV"
+
+    # cell types of single modules
+    # meaning of cell types is unclear, typical values are ´1` or ´0`.
+    - name: "battery_cell_type_1"
+      level: 1
+      address: 10781
+      datatype: "U16"
+      update_frequency: 3600 # once per hour
+    - name: "battery_cell_type_2"
+      level: 1
+      address: 10782
+      datatype: "U16"
+      update_frequency: 3600 # once per hour
+    - name: "battery_cell_type_3"
+      level: 1
+      address: 10783
+      datatype: "U16"
+      update_frequency: 3600 # once per hour
+    - name: "battery_cell_type_4"
+      level: 1
+      address: 10784
+      datatype: "U16"
+      update_frequency: 3600 # once per hour
+    - name: "battery_cell_type_5"
+      level: 1
+      address: 10785
+      datatype: "U16"
+      update_frequency: 3600 # once per hour
+    - name: "battery_cell_type_6"
+      level: 1
+      address: 10786
+      datatype: "U16"
+      update_frequency: 3600 # once per hour
+    - name: "battery_cell_type_7"
+      level: 1
+      address: 10787
+      datatype: "U16"
+      update_frequency: 3600 # once per hour
+    - name: "battery_cell_type_8"
+      level: 1
+      address: 10788
+      datatype: "U16"
+      update_frequency: 3600 # once per hour
+
+    # state of DC switch.
+    - name: "battery_state_dc_switch"
+      level: 1
+      address: 10789
+      datatype: "U16"
+
+  - hold:
+    # nothing here
+
+scan: # these have to be 1 less than the first register
+  - read:
+    - start: 10710     # to 10788 (10789 - 1).
+      range: 79        # 10788 - (10710 - 1) 
+  - hold:
+    # nothing here
+
