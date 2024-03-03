@@ -26,23 +26,45 @@ class DerivedRegisters:
         self.data = inverter.latest_scrape
 
     def calc(self):
-        self.create_reg_self_consumption()
-        self.create_reg_self_sufficiency()
+        self.create_reg_daily_self_consumption_ratio()
+        self.create_reg_total_self_consumption_ratio()
+        self.create_reg_self_sufficiency_rate()
         self.create_reg_residential_consumption()
         self.create_regs_power_flow()
 
-    def create_reg_self_consumption(self):
+    def create_reg_daily_self_consumption_ratio(self):
+        # Calculation:  consumed / generated
+
+        # generated is the pv generated energy (SunGather: daily_pv_generation)
+        # and consumed is the fraction of the pv generated energy which has
+        # been directly consumed (SunGather: daily_direct_energy_consumption).
+
+        # fail if prerequisites are missing:
+        if not "daily_direct_energy_consumption" in self.data:
+            return False
+        if not "daily_pv_generation" in self.data:
+            return False
+
+        if self.data["daily_pv_generation"] <= 0:
+            # generated energy must be > 0.
+            self.data["daily_self_consumption_ratio"] = 0
+        elif self.data["daily_direct_energy_consumption"] > self.data["daily_pv_generation"]:
+            # cannot have consumed more generated energy than has been generated.
+            self.data["daily_self_consumption_ratio"] = 100.0
+        else:
+            data["daily_self_consumption_ratio"] = (
+            self.data["daily_direct_energy_consumption"]
+            / self.data["daily_pv_generation"]
+            * 100.0
+        )
+        return True
+
+    def create_reg_total_self_consumption_ratio(self):
         # Calculation:  consumed / generated
 
         # generated is the pv generated energy (SunGather: total_pv_generation)
         # and consumed is the fraction of the pv generated energy which has
         # been directly consumed (SunGather: total_direct_energy_consumption).
-
-        # Calculated values:
-        # self_consumption_total
-
-        # A self consumption for the current day is already available
-        # (self_consumption_of_day).
 
         # fail if prerequisites are missing:
         if not "total_direct_energy_consumption" in self.data:
@@ -52,20 +74,19 @@ class DerivedRegisters:
 
         if self.data["total_pv_generation"] <= 0:
             # generated energy must be > 0.
-            return False
-
-        if self.data["total_direct_energy_consumption"] > self.data["total_pv_generation"]:
+            self.data["total_self_consumption_ratio"] = 0
+        elif self.data["total_direct_energy_consumption"] > self.data["total_pv_generation"]:
             # cannot have consumed more generated energy than has been generated.
-            return False
-
-        self.data["total_self_consumption"] = (
-            self.data["total_direct_energy_consumption"]
-            / self.data["total_pv_generation"]
-            * 100.0
-        )
+            self.data["total_self_consumption_ratio"] = 100
+        else:
+            self.data["total_self_consumption_ratio"] = (
+                self.data["total_direct_energy_consumption"]
+                / self.data["total_pv_generation"]
+                * 100.0
+            )
         return True
 
-    def create_reg_self_sufficiency(self):
+    def create_reg_self_sufficiency_rate(self):
         # Calculation: (direct consumption + battery discharge) / (direct
         # consumption + battery discharge + imported energy)
 
@@ -88,7 +109,7 @@ class DerivedRegisters:
         if not "total_import_energy" in self.data:
             return False
 
-        self.data["daily_self_sufficiency"] = (
+        self.data["daily_self_sufficiency_rate"] = (
             (
                 self.data["daily_direct_energy_consumption"]
                 + self.data["daily_battery_discharge_energy"]
@@ -101,7 +122,7 @@ class DerivedRegisters:
             * 100.0
         )
 
-        self.data["total_self_sufficiency"] = (
+        self.data["total_self_sufficiency_rate"] = (
             (
                 self.data["total_direct_energy_consumption"]
                 + self.data["total_battery_discharge_energy"]

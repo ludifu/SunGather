@@ -129,6 +129,7 @@ class SungrowClient():
             # required, but this should not fail.
             reg_len = reg.get("length", 15)
         else:
+            # "U16" or "S16"
             reg_len = 1
         return reg_len
 
@@ -681,8 +682,8 @@ class SungrowClient():
         # inverter:
         self.latest_scrape['device_type_code'] = self.inverter_config['model']
 
-        load_registers_count = 0
-        load_registers_failed = 0
+        load_ranges_count = 0
+        load_ranges_failed = 0
 
         scraper_ranges = self.register_ranges
         # Use a dynamically compiled list of address ranges instead of the
@@ -691,21 +692,21 @@ class SungrowClient():
             scraper_ranges = self.build_dyna_scan_address_ranges()
 
         for range in scraper_ranges:
-            load_registers_count +=1
-            logging.debug(f"Reading data {load_registers_count} of {len(scraper_ranges)}, " \
+            load_ranges_count +=1
+            logging.debug(f"Reading data {load_ranges_count} of {len(scraper_ranges)}, " \
                     + f"type ´{range.get('type')}`, range ´{range.get('start')}:{range.get('range')}`")
             if not self.load_registers(range.get('type'),
                                        int(range.get('start')),
                                        int(range.get('range'))):
-                load_registers_failed +=1
-        if load_registers_failed == load_registers_count:
+                load_ranges_failed +=1
+        if load_ranges_failed == load_ranges_count:
             # If every scrape fails, disconnect the client
             #logging.warning
             self.disconnect()
             return False
-        if load_registers_failed > 0:
+        if load_ranges_failed > 0:
             logging.warning(f'Reading: Failed to read some ranges'
-                            + f"({load_registers_failed} of {load_registers_count})!")
+                            + f"({load_ranges_failed} of {load_ranges_count})!")
 
         # Leave connection open, see if helps resolve the connection issues
         #self.close()
