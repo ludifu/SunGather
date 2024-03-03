@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 from SungrowClient import SungrowClient
+from FieldConfigurator import FieldConfigurator
 from version import __version__
 
 import importlib
@@ -12,6 +13,7 @@ import yaml
 import time
 import re
 import os
+
 
 def main():
     app_args = read_arguments_from_commandline()
@@ -28,7 +30,9 @@ def main():
 
     check_config(app_config, inverter_config)
 
-    register_config = load_registers(app_config, app_args["registersfilename"])
+    patches = app_config["inverter"].get("register_patches", None)
+    fc = FieldConfigurator(app_args["registersfilename"], register_patch_config=patches)
+    register_config = fc.get_register_config()
 
     inverter = setup_inverter(inverter_config, register_config)
 
@@ -101,9 +105,8 @@ def print_synopsis():
     print(f"-c config.yaml          : Specify config file.")
     print(f"-r registers-file.yaml  : Specify registers file.")
     print(f"-l logs/                : Specify folder to store logs.")
-    print(
-        f"-v 30                   : Logging Level, 10 = Debug, 20 = Info, 30 = Warning, 40 = Error"
-    )
+    print(f"-v 30                   : Logging Level")
+    print(f"                          10 = Debug, 20 = Info, 30 = Warning, 40 = Error")
     print(f"--runonce               : Run once then exit.")
     print(f"-h                      : print this help message and exit.")
     print(f"\nExample:")
@@ -176,227 +179,6 @@ def check_config(app_config, inverter_config):
         sys.exit(1)
 
 
-#######################################################################
-# functions for loading register definitions and patching registers
-
-
-def load_registers(app_configuration, registersfilename):
-    try:
-        registersfile = yaml.safe_load(open(registersfilename, encoding="utf-8"))
-        logging.info(
-            f"Loaded registers: {registersfilename}, file version: {registersfile.get('version','UNKNOWN')}"
-        )
-    except Exception as err:
-        logging.error(f"Failed: Loading registers: {registersfilename}  {err}")
-        sys.exit(f"Failed: Loading registers: {registersfilename} {err}")
-
-    # Full validation of the registers yaml syntax is rather scope of
-    # implementing a schema.
-
-    # These checks are to allow empty lists of read and hold sections within
-    # sections registers and scan. If these are empty in the yaml there will
-    # not be an empty list. This is substituted here.
-
-    if registersfile["registers"][0].get("read") is None:
-        registersfile["registers"][0]["read"] = []
-    if registersfile["registers"][1].get("hold") is None:
-        registersfile["registers"][1]["hold"] = []
-    if registersfile["scan"][0].get("read") is None:
-        registersfile["scan"][0]["read"] = []
-    if registersfile["scan"][1].get("hold") is None:
-        registersfile["scan"][1]["hold"] = []
-
-    patch_registers(app_configuration, registersfile)
-    print_register_list(registersfile)
-
-    return registersfile
-
-
-def patch_registers(app_configuration, register_configuration):
-    # Update the register_configuration with modifications defined in the config file.
-    patches = app_configuration["inverter"].get("register_patches", None)
-    if patches is None:
-        # section register_patches does not exist or does not have entries.
-        return
-    logging.info("Applying patches to register definitions ...")
-    allregs = [
-        *register_configuration["registers"][0]["read"],
-        *register_configuration["registers"][1]["hold"],
-    ]
-
-    for patch in patches:
-        apply_single_patch(patch, allregs)
-
-    for reg in allregs:
-        if reg.get("type") == "read":
-            register_configuration["registers"][0]["read"].append(reg)
-        elif reg.get("type") == "hold":
-            register_configuration["registers"][1]["hold"].append(reg)
-
-
-def apply_single_patch(patch, allregs):
-    # Apply one patch. A patch contains one or more attributes with
-    # values to add or change in one or more registers.
-    reg_name = patch.get("name")
-    if reg_name is None:
-        logging.error(
-            f"Register patch doesn't contain ´name` attribute, ignoring entry: {patch}."
-        )
-        return
-    for attribute_name in list(patch):
-        if attribute_name == "name":
-            # value of attribute ´name` is for matching the register,
-            # it doesn't contain a value for patching.
-            continue
-        attribute_value = patch.get(attribute_name)
-        patch_attribute(reg_name, attribute_name, attribute_value, allregs)
-
-
-def check_patch_value(attribute_name, attribute_value):
-    # Check whether the type of attribute_value is allowed for
-    # attribute_name and return True, otherwise return False.
-    if attribute_name in [
-        "address",
-        "level",
-        "length",
-        "update_frequency",
-    ] and not isinstance(attribute_value, int):
-        logging.error(
-            f"Trying to patch {attribute_name} to value ´{attribute_value}` failed. "
-            + f"Attributes ´level`, ´address`, ´length`, ´undate_frequency` "
-            + f"must not be patched to anything but an Integer!"
-        )
-        return False
-    if attribute_name in ["unit", "datatype", "change_name_to"] and not isinstance(
-        attribute_value, str
-    ):
-        logging.error(
-            f"Trying to patch {attribute_name} to value ´{attribute_value}` failed. "
-            + f"Attributes ´unit`, ´datatype` must not be patched to anything but a String!"
-        )
-        return False
-    if attribute_name in ["accuracy"] and not isinstance(attribute_value, float):
-        logging.error(
-            f"Trying to patch {attribute_name} to value ´{attribute_value}` failed. "
-            + f"Attribute ´accuracy` must not be patched to anything but a float!"
-        )
-        return False
-    return True
-
-
-def patch_attribute(reg_name, attribute_name, attribute_value, allregs):
-    # Patch one attribute in all registers which match reg_name.
-    if not check_patch_value(attribute_name, attribute_value):
-        return False
-    try:
-        p = re.compile(reg_name)
-    except re.error:
-        logging.error(
-            f"String ´{reg_name}` is not a valid expression for the attribute ´name` in a register patch!"
-        )
-        return False
-
-    pattern_did_match = False
-    for reg in allregs:
-        if p.fullmatch(reg.get("name")):
-            pattern_did_match = True
-            patch_register(reg, attribute_name, attribute_value)
-
-    # If there was no match for an existing register, then this entry is
-    # intended to create a new register!
-    if not pattern_did_match:
-        newreg = {}
-        newreg["name"] = reg_name
-        logging.info(f"Adding new register ´{reg_name}`.")
-        patch_register(newreg, attribute_name, attribute_value)
-        allregs.append(newreg)
-        # This still needs to be added to the ´read` or ´hold` register lists!
-
-    return True
-
-
-def patch_register(reg, attribute_name, attribute_value):
-    # Add or change one attribute (named attribute_name) to the value
-    # attribute_value in one register (reg).
-
-    # First check whether this entry is to rename an attribute:
-    if attribute_name == "change_name_to":
-        # switch attribute_name to "name" will have the register name changed:
-        attribute_name = "name"
-
-    if reg.get(attribute_name):
-        if reg.get(attribute_name) == attribute_value:
-            # No need for a change, the attribute is already set to attribute_value.
-            logging.info(
-                f"Patching register ´{reg.get('name')}`: attribute {attribute_name} "
-                + f"was already set to {attribute_value} (not changed)."
-            )
-        else:
-            # We will overwrite an existing value.
-            logging.info(
-                f"Patching register ´{reg.get('name')}`: {attribute_name} = {attribute_value} "
-                + f"(previous value was {reg.get(attribute_name)})."
-            )
-    else:
-        # The attribute will be added to this register.
-        logging.info(
-            f"Patching register ´{reg.get('name')}`: adding attribute {attribute_name} = {attribute_value}."
-        )
-    reg[attribute_name] = attribute_value
-
-
-def print_register_list(register_configuration):
-    print(
-        f"+-------------------------------------------------------------------------------+"
-    )
-    print(
-        f"| Register definitions after applying patches.                                  |"
-    )
-    print(
-        f"| Note: The list is not filtered by supported models!                           |"
-    )
-    print(
-        f"+--------------------------------------------+-------+------+-------+-------+---+"
-    )
-    print(
-        "| {:<42} | {:^5} | {:<4} | {:<5} | {:<5} |{:^3}|".format(
-            "register name", "unit", "type", "freq.", "addr", "lvl"
-        )
-    )
-    print(
-        f"+--------------------------------------------+-------+------+-------+-------+---+"
-    )
-    for reg in register_configuration["registers"][0]["read"]:
-        print(
-            "| {:<42} | {:^5} | {:<4} | {:>5} | {:>5} |{:^3}|".format(
-                reg.get("name"),
-                reg.get("unit", ""),
-                "read",
-                reg.get("update_frequency", ""),
-                reg.get("address", "-----"),
-                reg.get("level", "-"),
-            )
-        )
-    for reg in register_configuration["registers"][1]["hold"]:
-        print(
-            "| {:<42} | {:^5} | {:<4} | {:>5} | {:>5} |{:^3}|".format(
-                reg.get("name"),
-                reg.get("unit", ""),
-                "hold",
-                reg.get("update_frequency", ""),
-                reg.get("address", "-----"),
-                reg.get("level", "-"),
-            )
-        )
-    print(
-        f"+--------------------------------------------+-------+------+-------+-------+---+"
-    )
-
-
-#######################################################################
-# Set up the inverter.
-
-
 def setup_inverter(inverter_config, register_configuration):
     inverter = SungrowClient(inverter_config)
 
@@ -420,10 +202,6 @@ def setup_inverter(inverter_config, register_configuration):
     return inverter
 
 
-#######################################################################
-# Functions for setting up exports
-
-
 def setup_exports(app_configuration, inverter):
     # Note that exports may fail during configuration if data cannot be
     # read from the inverter!
@@ -445,7 +223,6 @@ def setup_exports(app_configuration, inverter):
         else:
             logging.critical(f"Fallback to export ´console` failed, exiting.")
             sys.exit(1)
-
     return exports
 
 
@@ -474,10 +251,6 @@ def load_one_export(export, inverter):
     else:
         logging.debug(f"... Export ´{export.get('name')}` is not enabled.")
         return None
-
-
-#######################################################################
-# Functions for polling the inverter.
 
 
 def core_loop(inverter, exports, interval, runonce):
