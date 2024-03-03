@@ -52,10 +52,10 @@ class DerivedRegisters:
             # cannot have consumed more generated energy than has been generated.
             self.data["daily_self_consumption_ratio"] = 100.0
         else:
-            data["daily_self_consumption_ratio"] = (
-            self.data["daily_direct_energy_consumption"]
-            / self.data["daily_pv_generation"]
-            * 100.0
+            self.data["daily_self_consumption_ratio"] = (
+                self.data["daily_direct_energy_consumption"]
+                / self.data["daily_pv_generation"]
+                * 100.0
         )
         return True
 
