@@ -1,7 +1,11 @@
-version: "v1.0.0 (0.2.3)"
+version: "v1.0.1 (0.2.3)"
 # change log:
 #
-# 2024-02-28: version "1.0.0 evo (0.2.3)"
+# v1.0.1
+
+# Bugfix: register total_power_yields / 5004: set accuracy to 0.1
+ 
+# v1.0.0 - 2024-02-28: version "1.0.0 evo (0.2.3)"
 
 # First version in the SunGatherEvo fork, own versioning. The version number
 # this file was forked off is "0.2.3". This version mainly contains changes to
@@ -395,6 +399,7 @@ registers:
       level: 1  
       address: 5004
       datatype: "U32"
+      accuracy: 0.1
       unit: "kWh"
     - name: "total_running_time"  
       level: 1  
