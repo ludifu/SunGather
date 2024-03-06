@@ -31,16 +31,58 @@ class DerivedRegisters:
         self.create_reg_self_sufficiency_rate()
         self.create_reg_residential_consumption()
         self.create_regs_power_flow()
+        self.create_reg_battery_total_charge_efficiency()
+        self.create_reg_battery_load_cycles()
+        self.create_reg_mppt_power()
+
+    def create_reg_mppt_power(self):
+        if "mppt_1_voltage" in self.data and "mppt_1_current" in self.data:
+            self.data["mppt_1_power"] = (
+                self.data["mppt_1_voltage"] * self.data["mppt_1_current"]
+            )
+        if "mppt_2_voltage" in self.data and "mppt_2_current" in self.data:
+            self.data["mppt_2_power"] = (
+                self.data["mppt_2_voltage"] * self.data["mppt_2_current"]
+            )
+        if "mppt_3_voltage" in self.data and "mppt_3_current" in self.data:
+            self.data["mppt_3_power"] = (
+                self.data["mppt_3_voltage"] * self.data["mppt_3_current"]
+            )
+
+        if "mppt_1_power" in self.data:
+            self.data["mppt_power"] = self.data["mppt_1_power"]
+        if "mppt_2_power" in self.data:
+            self.data["mppt_power"] += self.data["mppt_2_power"]
+        if "mppt_3_power" in self.data:
+            self.data["mppt_power"] += self.data["mppt_3_power"]
+
+        return True
+
+    def create_reg_battery_total_charge_efficiency(self):
+        if not "total_battery_discharge_energy" in self.data:
+            return False
+        if not "total_charge_energy" in self.data:
+            return False
+        self.data["battery_total_charge_efficiency"] = (
+            self.data["total_battery_discharge_energy"]
+            / self.data["total_charge_energy"]
+            * 100.0
+        )
+        return True
+
+    def create_reg_battery_load_cycles(self):
+        if not "total_charge_energy" in self.data:
+            return False
+        if not "battery_capacity_high_precision" in self.data:
+            return False
+        self.data["battery_load_cycles"] = (
+            self.data["total_charge_energy"]
+            / self.data["battery_capacity_high_precision"]
+        )
+        return True
 
     def create_reg_daily_self_consumption_ratio(self):
-        # Calculation:  consumed / generated
-
-        # generated is the pv generated energy (SunGather: daily_pv_generation)
-        # and consumed is the fraction of the pv generated energy which has
-        # been directly consumed (SunGather: daily_direct_energy_consumption).
-
-        # fail if prerequisites are missing:
-        if not "daily_direct_energy_consumption" in self.data:
+        if not "daily_export_energy" in self.data:
             return False
         if not "daily_pv_generation" in self.data:
             return False
@@ -48,26 +90,25 @@ class DerivedRegisters:
         if self.data["daily_pv_generation"] <= 0:
             # generated energy must be > 0.
             self.data["daily_self_consumption_ratio"] = 0
-        elif self.data["daily_direct_energy_consumption"] > self.data["daily_pv_generation"]:
+        elif self.data["daily_export_energy"] > self.data["daily_pv_generation"]:
             # cannot have consumed more generated energy than has been generated.
             self.data["daily_self_consumption_ratio"] = 100.0
         else:
             self.data["daily_self_consumption_ratio"] = (
-                self.data["daily_direct_energy_consumption"]
+                (self.data["daily_pv_generation"] - self.data["daily_export_energy"])
                 / self.data["daily_pv_generation"]
                 * 100.0
-        )
+            )
         return True
 
     def create_reg_total_self_consumption_ratio(self):
-        # Calculation:  consumed / generated
+        # Calculation:  (generated - exported) / generated
 
         # generated is the pv generated energy (SunGather: total_pv_generation)
-        # and consumed is the fraction of the pv generated energy which has
-        # been directly consumed (SunGather: total_direct_energy_consumption).
+        # and exported is the total_export_energy.
 
         # fail if prerequisites are missing:
-        if not "total_direct_energy_consumption" in self.data:
+        if not "total_export_energy" in self.data:
             return False
         if not "total_pv_generation" in self.data:
             return False
@@ -75,12 +116,12 @@ class DerivedRegisters:
         if self.data["total_pv_generation"] <= 0:
             # generated energy must be > 0.
             self.data["total_self_consumption_ratio"] = 0
-        elif self.data["total_direct_energy_consumption"] > self.data["total_pv_generation"]:
+        elif self.data["total_export_energy"] > self.data["total_pv_generation"]:
             # cannot have consumed more generated energy than has been generated.
-            self.data["total_self_consumption_ratio"] = 100
+            self.data["total_self_consumption_ratio"] = 100.0
         else:
             self.data["total_self_consumption_ratio"] = (
-                self.data["total_direct_energy_consumption"]
+                (self.data["total_pv_generation"] - self.data["total_export_energy"])
                 / self.data["total_pv_generation"]
                 * 100.0
             )
@@ -138,14 +179,6 @@ class DerivedRegisters:
         return True
 
     def create_reg_residential_consumption(self):
-
-        # Calculation: (direct consumption + battery discharge + imported
-        # energy)
-
-        # Calculation for today as well as total.
-        # residential_consumption_of_today
-        # residential_consumption_total
-
         if not "daily_direct_energy_consumption" in self.data:
             return False
         if not "daily_battery_discharge_energy" in self.data:
