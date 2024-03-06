@@ -77,6 +77,7 @@ class FieldConfigurator:
                 self.registers["registers"][0]["read"].append(reg)
             elif reg.get("type") == "hold":
                 self.registers["registers"][1]["hold"].append(reg)
+        logging.info("... finished applying patches to register definitions.")
 
     def apply_single_patch(self, patch, allregs):
         # Apply one patch. A patch contains one or more attributes with
@@ -148,7 +149,7 @@ class FieldConfigurator:
         if not pattern_did_match:
             newreg = {}
             newreg["name"] = reg_name
-            logging.info(f"Adding new register ´{reg_name}`.")
+            logging.debug(f"Adding new register ´{reg_name}`.")
             self.patch_register(newreg, attribute_name, attribute_value)
             allregs.append(newreg)
             # This still needs to be added to the ´read` or ´hold` register lists later!
@@ -166,19 +167,19 @@ class FieldConfigurator:
         if reg.get(attribute_name):
             if reg.get(attribute_name) == attribute_value:
                 # No need for a change, the attribute is already set to attribute_value.
-                logging.info(
+                logging.debug(
                     f"Patching register ´{reg.get('name')}`: attribute {attribute_name} "
                     + f"was already set to {attribute_value} (not changed)."
                 )
             else:
                 # We will overwrite an existing value.
-                logging.info(
+                logging.debug(
                     f"Patching register ´{reg.get('name')}`: {attribute_name} = {attribute_value} "
                     + f"(previous value was {reg.get(attribute_name)})."
                 )
         else:
             # The attribute will be added to this register.
-            logging.info(
+            logging.debug(
                 f"Patching register ´{reg.get('name')}`: adding attribute {attribute_name} = {attribute_value}."
             )
         reg[attribute_name] = attribute_value

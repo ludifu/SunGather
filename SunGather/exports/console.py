@@ -18,12 +18,12 @@ class export_console(object):
         return True
 
     def publish(self, inverter):
-        print("+----------------------------------------------------------------------+") 
-        print("| {:<7} | {:<35} | {:<20} |".format('Address', 'Register','Value'))
-        print("+---------+-------------------------------------+----------------------+") 
+        print("+------------------------------------------------------------------------------------+") 
+        print("| {:<7} | {:<42} | {:<27} |".format('Address', 'Register','Value'))
+        print("+---------+--------------------------------------------+-----------------------------+") 
         for register, value in inverter.latest_scrape.items():
-            print("| {:<7} | {:<35} | {:<20} |".format(str(inverter.getRegisterAddress(register)), str(register), str(value) + " " + str(inverter.getRegisterUnit(register))))
-        print("+----------------------------------------------------------------------+") 
+            print("| {:<7} | {:<42} | {:<27} |".format(str(inverter.getRegisterAddress(register)), str(register), str(value) + " " + str(inverter.getRegisterUnit(register))))
+        print("+---------+--------------------------------------------+-----------------------------+") 
         print(f"Logged {len(inverter.latest_scrape)} registers to Console")
 
         return True
