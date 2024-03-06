@@ -731,14 +731,14 @@ class SungrowClient():
 
 
     def print_register_list(self):
-        print(f"+-------------------------------------------------------------------------+")
-        print(f"| List of registers which are read from the inverter.                     |")
-        print(f"| The list is filtered according to the level and model support.          |")
-        print(f"+------------------------------------------+-------+------+-------+-------+")
-        print("| {:<40} | {:^5} | {:<4} | {:<5} | {:<5} |".format('register name', 'unit', 'type', 'freq.', 'addr.'))
-        print(f"+------------------------------------------+-------+------+-------+-------+")
+        print(f"+---------------------------------------------------------------------------+")
+        print(f"| List of registers which are read from the inverter.                       |")
+        print(f"| The list is filtered according to the level and model support.            |")
+        print(f"+--------------------------------------------+-------+------+-------+-------+")
+        print("| {:<42} | {:^5} | {:<4} | {:<5} | {:<5} |".format('register name', 'unit', 'type', 'freq.', 'addr.'))
+        print(f"+--------------------------------------------+-------+------+-------+-------+")
         for reg in self.registers:
-            print("| {:<40} | {:^5} | {:<4} | {:<5} | {:<5} |".format(reg.get("name"), reg.get("unit",""), reg.get("type"), reg.get("update_frequency", ""), reg.get("address", "----")))
-        print(f"+------------------------------------------+-------+------+-------+-------+")
+            print("| {:<42} | {:^5} | {:<4} | {:<5} | {:<5} |".format(reg.get("name"), reg.get("unit",""), reg.get("type"), reg.get("update_frequency", ""), reg.get("address", "----")))
+        print(f"+--------------------------------------------+-------+------+-------+-------+")
 
 
