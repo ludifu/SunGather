@@ -6,7 +6,7 @@ import yaml
 from datetime import datetime
 from datetime import date
 
-'''
+"""
     fm = FieldPostProcessor(config_filename="xf.yaml")
     #fm = FieldPostProcessor(config=[{'field': 'load_doubled', 'expression': 'load_power_hybrid * 2'}])
 
@@ -18,17 +18,18 @@ from datetime import date
 
     fm.evaluate({'export_to_grid': 1000, 'meter_power': 100, 'total_active_power': 200})
     time.sleep(10)
-'''
+"""
+
 
 class AbstractCode:
 
     # This class is the common ancestor for all classes representing
     # expressions and statements.  It should not be instantiated.
 
-    def __init__(self, name, source):
+    def __init__(self, name, source, unit=None):
 
-        # All kinds of AbstractCode objects have a name. Subclasses use the
-        # name in different ways.
+        # All kinds of AbstractCode objects have a name. The name is always
+        # used as a field name.
         self.name = name
 
         # The source of the code fragment.
@@ -41,6 +42,11 @@ class AbstractCode:
         # not be an issue with a few custom field definitions ...
         self.code = self.compile(self.source, self.name)
 
+        # Strictly optional and not used in this module, the unit is a String
+        # indicating how to interpret the value of the field, for example "kWh"
+        # or "seconds".
+        self.unit = unit
+
     def evaluate(self, values):
         # Evaluate the expression or statement represented by the receiver. Any
         # variables referenced by the source must be provided in the values
@@ -51,7 +57,6 @@ class AbstractCode:
         # Calls to evaluate() can safely be made, even if the compilation
         # failed. This will not cause errors, however it will of course not
         # yield any results.
-
         if self.code is None:
             return None
 
@@ -64,17 +69,30 @@ class AbstractCode:
             # available in the result.  every time. So this is logged at level
             # INFO.
             logging.warning(f"Entry ´{self.name}` not evaluated: {error}.")
+            return self.do_fallback(values)
         return None
 
     def do_evaluate(self, values):
         # The behavior is defined by subclasses.
         pass
 
+    def do_fallback(self, values):
+        # Do whatever should happen as a fallback if and only if do_evaluate()
+        # fails with an exception. By default return None, intended to be
+        # overwritten by subclasses.
+        return None
+
     def get_source_kind(self):
         # Return either "eval" or "exec" to indicate whether the source is an
         # expression or statement respectively. The behavior is defined by
         # subclasses.
         pass
+
+    def as_list_entry(self):
+        entry = {"name": self.name}
+        if self.unit is not None:
+            entry["unit"] = self.unit
+        return entry
 
     def compile(self, source, name):
         # Compile the source and return the compiled code object.  The name
@@ -98,8 +116,8 @@ class FieldStatement(AbstractCode):
     # (in contrast to an expression). It is intended to store one or more custom
     # field values into the results, but the scope is not limited to this.
 
-    def __init__(self, name, statement):
-        super().__init__(name, statement)
+    def __init__(self, name, statement, unit=None):
+        super().__init__(name, statement, unit=unit)
 
         # This dictionary may be used in statements to store key value pairs
         # which are available in a later evaluation. Its values are preserved
@@ -116,7 +134,7 @@ class FieldStatement(AbstractCode):
         # results into this dictionary.
 
         # Add some libraries in addition to the builtins (which are
-        # automatically added) into the global disctionary.
+        # automatically added) into the global dictionary.
 
         return exec(
             self.code,
@@ -155,13 +173,21 @@ class FieldExpression(SimpleExpression):
     # A FieldExpression has access to the current values of the data retrieved
     # from the inverter during the last read operation.
 
-    def __init__(self, field, expression, guard_expression=None, write_mode=None):
-        super().__init__(field, expression)
+    def __init__(
+        self,
+        field,
+        expression,
+        guard_expression=None,
+        write_mode=None,
+        fallback_expression=None,
+        unit=None,
+    ):
+        super().__init__(field, expression, unit=unit)
 
         # A write_mode of "replace_only" will only write a value, if a value
         # with that name already exists. The write_mode of "new_only" will
-        # write a result only, if a value with that does not yet exist. A
-        # write_mode of "always" will write the result in any case. "always" is
+        # write a result only, if a value with that name does not yet exist. A
+        # write_mode of None will write the result in any case. None is
         # the default.
         self.write_mode = write_mode
 
@@ -169,13 +195,19 @@ class FieldExpression(SimpleExpression):
         if guard_expression is not None:
             self.guard = GuardExpression(field, guard_expression)
 
+        self.fallback = None
+        if fallback_expression is not None:
+            self.fallback = SimpleExpression(field, fallback_expression)
+
     def write_mode_allows_writing(self, values):
         # Return True if the receiver should evaluate and write a result.
         if self.write_mode is None:
             return True
         if self.write_mode == "replace_only":
+            # True if the value already exists:
             return values.get(self.name) is not None
         if self.write_mode == "new_only":
+            # True if the value does not yet exist:
             return values.get(self.name) is None
         return False
 
@@ -192,8 +224,18 @@ class FieldExpression(SimpleExpression):
             )
             values[self.name] = result
             return result
+        return None
+
+    def do_fallback(self, values):
+        if self.fallback is not None:
+            logging.debug(f"evaluating fallback for ´{self.name}` ...")
+            fallback_result = self.fallback.evaluate(values)
+            if fallback_result is not None:
+                values[self.name] = fallback_result
+                return fallback_result
         else:
-            return None
+            logging.debug(f"no fallback for ´{self.name}` ...")
+        return None
 
 
 class AggregatingFieldExpression(FieldExpression):
@@ -217,12 +259,16 @@ class AggregatingFieldExpression(FieldExpression):
         aggregation_mode,
         guard_expression=None,
         write_mode=None,
+        fallback_expression=None,
+        unit=None,
     ):
         super().__init__(
             field,
             expression,
             guard_expression=guard_expression,
             write_mode=write_mode,
+            fallback_expression=fallback_expression,
+            unit=unit,
         )
 
         # Remember the previous value to make it available when evaluating the
@@ -296,8 +342,8 @@ class GuardExpression(SimpleExpression):
 
 class CodeObjectFactory:
 
-    # The responsibility of this class is to create a suitable class for a
-    # custom field definition entry. It has only one class method.
+    # The responsibility of this class is to create an instance of a suitable
+    # class for a custom field definition entry. It has only one class method.
     # Instantiation of this class is not required.
 
     def __init__(self):
@@ -311,19 +357,25 @@ class CodeObjectFactory:
         guard = config.get("guard")
         aggr = config.get("aggregate")
         wrtm = config.get("write_mode")
+        flbk = config.get("fallback")
+        unit = config.get("unit")
         ignore_msg = f"Ingnored config entry ´{config}`: "
         if name is None:
             logging.error(ignore_msg + f"name is required.")
             return None
         if stmt:
-            if guard or wrtm or aggr or expr:
+            if guard or wrtm or aggr or expr or flbk:
                 logging.error(
                     ignore_msg
-                    + f"guard, expression, aggregate, write_mode not allowed in combination with statementy."
+                    + f"guard, expression, aggregate, write_mode, fallback not allowed in combination with statement."
                 )
                 return None
             else:
-                return FieldStatement(name, stmt)
+                return FieldStatement(
+                    name,
+                    stmt,
+                    unit=unit,
+                )
         elif expr:
             if aggr and aggr not in ["daily", "total"]:
                 logging.error(
@@ -337,11 +389,22 @@ class CodeObjectFactory:
                 return None
             if aggr:
                 return AggregatingFieldExpression(
-                    name, expr, aggr, guard_expression=guard, write_mode=wrtm
+                    name,
+                    expr,
+                    aggr,
+                    guard_expression=guard,
+                    write_mode=wrtm,
+                    fallback_expression=flbk,
+                    unit=unit,
                 )
             else:
                 return FieldExpression(
-                    name, expr, guard_expression=guard, write_mode=wrtm
+                    name,
+                    expr,
+                    guard_expression=guard,
+                    write_mode=wrtm,
+                    fallback_expression=flbk,
+                    unit=unit,
                 )
         else:
             logging.error(ignore_msg + f"expression or statement required.")
@@ -350,19 +413,16 @@ class CodeObjectFactory:
 
 class FieldPostProcessor:
 
-    def __init__(self, config=None, config_filename=None):
-
-        # List of custom field definitions
-        cf_definitions = self.get_config(config, config_filename)
-
-        # Initialize list of code objects to evaluate.
+    def __init__(self, cf_definitions):
         self.expressions = []
-        for cf in cf_definitions:
-            co = CodeObjectFactory.create(cf)
-            if co is not None:
-                self.expressions.append(co)
+        if cf_definitions is not None:
+            # Initialize list of code objects to evaluate.
+            for cf in cf_definitions:
+                co = CodeObjectFactory.create(cf)
+                if co is not None:
+                    self.expressions.append(co)
         if len(self.expressions) == 0:
-            logging.warning("No custom fields defined!")
+            logging.info("No custom fields configured.")
 
     def evaluate(self, values):
         # Calculate all expressions using the values and storing the results in values.
@@ -372,37 +432,8 @@ class FieldPostProcessor:
         logging.info("... finished evaluating custom field definitions.")
         logging.debug(f"values after evaluating custom field definitions: {values}")
 
-    def get_config(self, config, config_filename):
-        # retrieve the list of custom fields definitions from either a
-        # provided configuration or by reading a config file as an alternative.
-        # return a list in any case, even if empty.
-        if config is not None and config_filename is not None:
-            logging.warning(
-                "Both configuration and config filename are provided for "
-                + "initialization of a {self.__class__.__name__} instance. Ignoring the "
-                + "config_filename."
-            )
-        if config is None and config_filename is None:
-            logging.error(
-                f"Either a configuration or a config filename are required for "
-                + f"initialization of a {self.__class__.__name__} instance!"
-            )
-            return []
-        if config is not None:
-            return config
-        else:
-            return self.load_config_file(config_filename)
-
-    def load_config_file(self, config_filename):
-        # load a configuration file - hopefully - containing a "customfields" entry.
-        # return a list in any case.
-        try:
-            f = yaml.safe_load(open(config_filename, encoding="utf-8"))
-            logging.info(f"Loaded custom fields config: {config_filename}")
-            if f is not None:
-                return f.get("customfields", [])
-            else:
-                return []
-        except Exception as err:
-            logging.error(f"Failed loading config: {config_filename}: {err}")
-            return []
+    def get_field_list(self):
+        the_list = []
+        for e in self.expressions:
+            the_list.append(e.as_list_entry())
+        return the_list

@@ -5,6 +5,7 @@ from SungrowModbusWebClient import SungrowModbusWebClient
 from pymodbus.client.sync import ModbusTcpClient
 
 from DerivedRegisters import DerivedRegisters
+from FieldPostProcessor import FieldPostProcessor
 
 from datetime import datetime
 
@@ -39,6 +40,14 @@ class SungrowClient():
         
         self.registers = [[]]
         self.registers.pop() # Remove null value from list
+        self.register_ranges = [[]]
+        self.register_ranges.pop() # Remove null value from list
+
+        self.latest_scrape = {}
+
+        fpp = FieldPostProcessor(config_inverter.get("customfields", None))
+        self.field_post_processor = fpp 
+
         if not config_inverter.get('disable_custom_registers'):
             self.registers_custom = [   {'name': 'run_state', 'address': 'vr001'},
                                         {'name': 'timestamp', 'address': 'vr002'},
@@ -51,10 +60,6 @@ class SungrowClient():
         else:
             self.registers_custom = []
 
-        self.register_ranges = [[]]
-        self.register_ranges.pop() # Remove null value from list
-
-        self.latest_scrape = {}
 
     def connect(self):
         logging.debug("Connecting to the inverter ...")
@@ -423,29 +428,24 @@ class SungrowClient():
         return True
 
 
+    def get_my_register_list(self):
+        return [*self.registers, *self.registers_custom, *self.field_post_processor.get_field_list()]
+
+
     def validateRegister(self, check_register):
-        for register in self.registers:
-            if check_register == register['name']:
-                return True
-        for register in self.registers_custom:
+        for register in self.get_my_register_list():
             if check_register == register['name']:
                 return True
         return False
 
     def getRegisterAddress(self, check_register):
-        for register in self.registers:
+        for register in self.get_my_register_list():
             if check_register == register['name']:
-                return register['address']
-        for register in self.registers_custom:
-            if check_register == register['name']:
-                return register['address']
+                return register.get('address', '----')
         return '----'
 
     def getRegisterUnit(self, check_register):
-        for register in self.registers:
-            if check_register == register['name']:
-                return register.get('unit','')
-        for register in self.registers_custom:
+        for register in self.get_my_register_list():
             if check_register == register['name']:
                 return register.get('unit','')
         return ''
@@ -663,10 +663,7 @@ class SungrowClient():
         self.latest_scrape["daily_import_from_grid"] += ((self.latest_scrape["import_from_grid"] / 1000) * (self.inverter_config['scan_interval'] / 60 / 60) )
 
 
-    def scrape(self):
-        logging.info(f"Start reading ranges of data from inverter.")
-        scrape_start = datetime.now()
-
+    def init_latest_scrape(self):
         persisted = self.persist_registers_from_previous_scrape()
 
         # initialize the current scrape:
@@ -676,6 +673,13 @@ class SungrowClient():
         if persisted is not None:
             for register, value in persisted.items():
                 self.latest_scrape[register] = value
+
+
+    def scrape(self):
+        logging.info(f"Start reading ranges of data from inverter.")
+        scrape_start = datetime.now()
+
+        self.init_latest_scrape()
 
         # Note that using the value from the inverter config means that if the
         # model has been configured, it will actually never be read from the
@@ -716,10 +720,7 @@ class SungrowClient():
         # If alarm state exists then convert to timestamp, otherwise remove it
         self.convert_alarm_time_fields_to_timestamp()
 
-        # derive custom registers from scraped values if required:
-        if not self.inverter_config.get('disable_custom_registers'):
-            self.create_custom_registers()
-            DerivedRegisters(self).calc()
+        self.do_field_post_processing()
 
         scrape_end = datetime.now()
         logging.info(f'Finished reading ranges of data from inverter '
@@ -730,15 +731,25 @@ class SungrowClient():
         return True
 
 
+    def do_field_post_processing(self):
+        # derive custom registers from scraped values if required:
+        if not self.inverter_config.get('disable_custom_registers'):
+            self.create_custom_registers()
+            DerivedRegisters(self).calc()
+        if self.field_post_processor is not None:
+            self.field_post_processor.evaluate(self.latest_scrape)
+
+
+
     def print_register_list(self):
-        print(f"+---------------------------------------------------------------------------+")
-        print(f"| List of registers which are read from the inverter.                       |")
-        print(f"| The list is filtered according to the level and model support.            |")
-        print(f"+--------------------------------------------+-------+------+-------+-------+")
+        print("+---------------------------------------------------------------------------+")
+        print("| List of registers which are read from the inverter.                       |")
+        print("| The list is filtered according to the level and model support.            |")
+        print("+--------------------------------------------+-------+------+-------+-------+")
         print("| {:<42} | {:^5} | {:<4} | {:<5} | {:<5} |".format('register name', 'unit', 'type', 'freq.', 'addr.'))
-        print(f"+--------------------------------------------+-------+------+-------+-------+")
+        print("+--------------------------------------------+-------+------+-------+-------+")
         for reg in self.registers:
             print("| {:<42} | {:^5} | {:<4} | {:<5} | {:<5} |".format(reg.get("name"), reg.get("unit",""), reg.get("type"), reg.get("update_frequency", ""), reg.get("address", "----")))
-        print(f"+--------------------------------------------+-------+------+-------+-------+")
+        print("+--------------------------------------------+-------+------+-------+-------+")
 
 

@@ -147,6 +147,7 @@ def get_inverter_config(app_configuration):
         "disable_custom_registers": app_configuration["inverter"].get(
             "disable_custom_registers", False
         ),
+        "customfields": app_configuration["inverter"].get("customfields", []),
     }
     return config_inverter
 
@@ -180,6 +181,7 @@ def check_config(app_config, inverter_config):
 
 
 def setup_inverter(inverter_config, register_configuration):
+
     inverter = SungrowClient(inverter_config)
 
     # Establish the first connection.  Note the client will return True if no
