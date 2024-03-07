@@ -1,11 +1,11 @@
 inverter:
-  host: 192.168.1.100                       # [Required] IP Address of the Inverter or Dongle
+  # host: localhost                         # [Optional] Default is localhost. IP Address of the Inverter or Dongle (or modbus-proxy host).
   # port: 502                               # [Optional] Default for modbus is 502, for http is 8082
   # timeout: 10                             # [Optional] Default is 10, how long to wait for a connection
   # retries: 3                              # [Optional] Default is 3, how many times to retry if connection fails
   # slave: 0x01                             # [Optional] Default is 0x01
   # scan_interval: 30                       # [Optional] Default is 30
-  connection: modbus                        # [Required] options: modbus, sungrow, http
+  # connection: modbus                      # [Optional] Default is modbus, options: modbus, sungrow, http
   # model: "SG7.0RT"                        # [Optional] This is autodetected on startup, only needed if detection issues or for testing
                                             # See model list here: https://github.com/bohdan-s/SunGather#supported
   # serial: xxxxxxxxxx                      # [Optional] This is autodetected on startup, only needed if detection issues or for testing, used as a unique ID
@@ -18,6 +18,106 @@ inverter:
                                             # 1 (default) = Useful data, all required for exports, 
                                             # 2 everything your Inverter supports, 
                                             # 3 Everything from every register 
+
+  # Correct datatype for all software_version registers and provide the correct length for serial_number.
+  # Telegraf users: Remember to add the fields device_type_code, model, serial_number, battery_serial_number, arm_software_version,
+  # battery_software_version, dsp_software_version into the json_string_fields array in your telegraf.conf!
+  # See https://docs.influxdata.com/telegraf/v1/data_formats/input/json/
+  register_patches:
+    - name: "serial_number"
+      length: 10
+    - name: ".*_software_version"
+      length: 15
+      datatype: "UTF-8"
+
+
+
+  # Disable the creation of hardcoded custom fields:
+  disable_custom_registers: True
+
+
+  customfields:
+
+    # Create the original custom fields.
+    # Remove leading underscores in those you need, delete the rest.
+ 
+    # export_to_grid
+    - name: "_export_to_grid"
+      guard: "meter_power < 0"
+      expression: "abs(meter_power)"
+
+    - name: "_export_to_grid"
+      guard: "export_power < 0"
+      expression: "abs(export_power)"
+      write_mode: "new_only"
+
+    - name: "_export_to_grid"
+      guard: "export_power_hybrid >= 0"
+      expression: "export_power_hybrid"
+      write_mode: "new_only"
+
+    - name: "_export_to_grid"
+      expression: "0"
+      write_mode: "new_only"
+
+    # import_from_grid
+    - name: "_import_from_grid"
+      guard: "meter_power >= 0"
+      expression: "meter_power"
+
+    - name: "_import_from_grid"
+      guard: "export_power >= 0"
+      expression: "export_power"
+      write_mode: "new_only"
+
+    - name: "_import_from_grid"
+      guard: "export_power_hybrid < 0"
+      expression: "abs(export_power_hybrid)"
+      write_mode: "new_only"
+
+    - name: "_import_from_grid"
+      expression: "0"
+      write_mode: "new_only"
+
+    # daily_export_to_grid
+    - name: "_daily_export_to_grid"
+      expression: "_export_to_grid / 1000 / 60 / 60 * seconds_since_last_update()"
+      aggregate: "daily"
+
+    # daily_import_from_grid
+    - name: "_daily_import_from_grid"
+      expression: "_import_from_grid / 1000 / 60 / 60 * seconds_since_last_update()"
+      aggregate: "daily"
+
+    # run_state
+    # Note the implementation of this custom field is broken in the original SunGather: run_state is always 'ON'. This entry actually mimics the broken original behavoir.
+    - name: "_run_state"
+      expression: "'ON'"
+
+
+    # timestamp
+    # Instead of configuring use_local_time to True simply delete the following entry:
+    - name: "_timestamp"
+      expression: "'%04d-%02d-%02d %02d:%02d:%02d' % (year, month, day, hour, minute, second)"
+
+    - name: "_timestamp"
+      expression: "datetime.now().strftime('%Y-%m-%d %H:%M:%S')"
+      write_mode: "new_only"
+
+    # Statements to remove the fields year, month, day, hour, minute, second.
+    - name: "_timestamp"
+      statement: "if results.get('year', False): del results['year']"
+    - name: "_timestamp"
+      statement: "if results.get('month', False): del results['month']"
+    - name: "_timestamp"
+      statement: "if results.get('day', False): del results['day']"
+    - name: "_timestamp"
+      statement: "if results.get('hour', False): del results['hour']"
+    - name: "_timestamp"
+      statement: "if results.get('minute', False): del results['minute']"
+    - name: "_timestamp"
+      statement: "if results.get('second', False): del results['second']"
+
 
 # If you do not want to use a export, you can either remove the whole configuration block
 # or set enabled: False

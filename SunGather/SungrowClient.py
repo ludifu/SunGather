@@ -625,15 +625,12 @@ class SungrowClient(SungrowClientCore):
     def persist_registers_from_previous_scrape(self):
         # some custom registers are derived using values from the current and - if available - the previous scrape.
         # Conserve any previous values already existing or initialize if not yet present.
-        if not self.inverter_config['disable_custom_registers']:
-            persist_registers = {
-                "run_state":                self.latest_scrape.get("run_state","ON"),
-                "last_reset":               self.latest_scrape.get("last_reset",""),
-                "daily_export_to_grid":     self.latest_scrape.get("daily_export_to_grid",0),
-                "daily_import_from_grid":   self.latest_scrape.get("daily_import_from_grid",0),
-            }
-        else:
-            persist_registers = None
+        persist_registers = {
+            "run_state":                self.latest_scrape.get("run_state","ON"),
+            "last_reset":               self.latest_scrape.get("last_reset",""),
+            "daily_export_to_grid":     self.latest_scrape.get("daily_export_to_grid",0),
+            "daily_import_from_grid":   self.latest_scrape.get("daily_import_from_grid",0),
+        }
         return persist_registers
 
     def do_field_post_processing(self):
@@ -642,9 +639,8 @@ class SungrowClient(SungrowClientCore):
         # If alarm state exists then convert to timestamp, otherwise remove it
         self.convert_alarm_time_fields_to_timestamp()
         # derive custom registers from scraped values if required:
-        if not self.inverter_config.get('disable_custom_registers'):
-            self.create_custom_registers()
-            DerivedRegisters(self).calc()
+        self.create_custom_registers()
+        DerivedRegisters(self).calc()
 
     def convert_alarm_time_fields_to_timestamp(self):
         if self.latest_scrape.get("pid_alarm_code"):
@@ -701,6 +697,9 @@ class SungrowClient(SungrowClientCore):
         try:
             if self.latest_scrape.get('start_stop'):
                 logging.debug(f"start_stop:{self.latest_scrape.get('start_stop', 'null')} work_state_1:{self.latest_scrape.get('work_state_1', 'null')}")    
+                # The next line of code is broken and will throw an exception. This is a coding error which is completely obscured by the except block below.
+                # The original intention of this code is not sufficiently clear to actually fix it.
+                # The effect of this error is that run_state will always stay on its initialized value of 'ON'.
                 if self.latest_scrape.get('start_stop', False) == 'Start' and self.latest_scrape.get('work_state_1', False).contains('Run'):
                     self.latest_scrape["run_state"] = "ON"
                 else:
