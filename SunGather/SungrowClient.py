@@ -597,30 +597,29 @@ class SungrowClient(SungrowClientCore):
 
     def __init__(self, config_inverter):
         super().__init__(config_inverter)
-        if not config_inverter.get('disable_custom_registers'):
-            self.registers_custom = [   {'name': 'run_state', 'address': 'vr001'},
-                                        {'name': 'timestamp', 'address': 'vr002'},
-                                        {'name': 'last_reset', 'address': 'vr003'},
-                                        {'name': 'export_to_grid', 'unit': 'W', 'address': 'vr004'}, 
-                                        {'name': 'import_from_grid', 'unit': 'W', 'address': 'vr005'}, 
-                                        {'name': 'daily_export_to_grid', 'unit': 'kWh', 'address': 'vr006'}, 
-                                        {'name': 'daily_import_from_grid', 'unit': 'kWh', 'address': 'vr007'}
-                                    ]
-        else:
-            self.registers_custom = []
+        self.registers_custom = [   {'name': 'run_state', 'address': 'vr001'},
+                                    {'name': 'timestamp', 'address': 'vr002'},
+                                    {'name': 'last_reset', 'address': 'vr003'},
+                                    {'name': 'export_to_grid', 'unit': 'W', 'address': 'vr004'}, 
+                                    {'name': 'import_from_grid', 'unit': 'W', 'address': 'vr005'}, 
+                                    {'name': 'daily_export_to_grid', 'unit': 'kWh', 'address': 'vr006'}, 
+                                    {'name': 'daily_import_from_grid', 'unit': 'kWh', 'address': 'vr007'}
+                                ]
 
     def get_my_register_list(self):
         the_super_list = super().get_my_register_list()
         return [*the_super_list, *self.registers_custom]
 
     def init_latest_scrape(self):
-        persisted = self.persist_registers_from_previous_scrape()
-        # initialize the current scrape:
+        persist_registers = {
+            "run_state":                self.latest_scrape.get("run_state","ON"),
+            "last_reset":               self.latest_scrape.get("last_reset",""),
+            "daily_export_to_grid":     self.latest_scrape.get("daily_export_to_grid",0),
+            "daily_import_from_grid":   self.latest_scrape.get("daily_import_from_grid",0),
+        }
         self.latest_scrape = {}
-        # copy the persisted values into the current scrape:
-        if persisted is not None:
-            for register, value in persisted.items():
-                self.latest_scrape[register] = value
+        for register, value in persist_registers.items():
+            self.latest_scrape[register] = value
 
     def persist_registers_from_previous_scrape(self):
         # some custom registers are derived using values from the current and - if available - the previous scrape.

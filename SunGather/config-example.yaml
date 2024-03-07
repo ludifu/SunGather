@@ -41,6 +41,11 @@ inverter:
     # Create the original custom fields.
     # Remove leading underscores in those you need, delete the rest.
  
+    # last_reset
+    # Fixed to 00:00:00 on the current day as this is what the daily aggregation always starts at even if SungatherEvo is started during the day.
+    - name: "_last_reset"
+      expression: "datetime.now().strftime('%Y-%m-%d 00:00:00')"
+
     # export_to_grid
     - name: "_export_to_grid"
       guard: "meter_power < 0"
