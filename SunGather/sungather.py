@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 from SungrowClient import SungrowClient
+from SungrowClient import SungrowClientCore
 from FieldConfigurator import FieldConfigurator
 from version import __version__
 
@@ -182,7 +183,10 @@ def check_config(app_config, inverter_config):
 
 def setup_inverter(inverter_config, register_configuration):
 
-    inverter = SungrowClient(inverter_config)
+    if inverter_config.get("disable_custom_registers"):
+        inverter = SungrowClientCore(inverter_config)
+    else:
+        inverter = SungrowClient(inverter_config)
 
     # Establish the first connection.  Note the client will return True if no
     # exception occurred in the library even if the connection could not be

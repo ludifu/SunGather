@@ -13,7 +13,8 @@ import logging
 import logging.handlers
 import time
 
-class SungrowClient():
+
+class SungrowClientCore():
     def __init__(self, config_inverter):
 
         self.client_config = {
@@ -33,7 +34,6 @@ class SungrowClient():
             "connection":                config_inverter.get('connection'),
             "slave":                     config_inverter.get('slave'),
             "dyna_scan":                 config_inverter.get('dyna_scan'),
-            "disable_custom_registers":  config_inverter.get('disable_custom_registers'),
             "start_time":       ""
         }
         self.client = None
@@ -48,17 +48,6 @@ class SungrowClient():
         fpp = FieldPostProcessor(config_inverter.get("customfields", None))
         self.field_post_processor = fpp 
 
-        if not config_inverter.get('disable_custom_registers'):
-            self.registers_custom = [   {'name': 'run_state', 'address': 'vr001'},
-                                        {'name': 'timestamp', 'address': 'vr002'},
-                                        {'name': 'last_reset', 'address': 'vr003'},
-                                        {'name': 'export_to_grid', 'unit': 'W', 'address': 'vr004'}, 
-                                        {'name': 'import_from_grid', 'unit': 'W', 'address': 'vr005'}, 
-                                        {'name': 'daily_export_to_grid', 'unit': 'kWh', 'address': 'vr006'}, 
-                                        {'name': 'daily_import_from_grid', 'unit': 'kWh', 'address': 'vr007'}
-                                    ]
-        else:
-            self.registers_custom = []
 
 
     def connect(self):
@@ -429,7 +418,7 @@ class SungrowClient():
 
 
     def get_my_register_list(self):
-        return [*self.registers, *self.registers_custom, *self.field_post_processor.get_field_list()]
+        return [*self.registers, *self.field_post_processor.get_field_list()]
 
 
     def validateRegister(self, check_register):
@@ -522,21 +511,135 @@ class SungrowClient():
         return ranges
 
 
+
+
+    def init_latest_scrape(self):
+        self.latest_scrape = {}
+
+
+    def scrape(self):
+        logging.info(f"Start reading ranges of data from inverter.")
+        scrape_start = datetime.now()
+
+        self.init_latest_scrape()
+
+        # Note that using the value from the inverter config means that if the
+        # model has been configured, it will actually never be read from the
+        # inverter:
+        self.latest_scrape['device_type_code'] = self.inverter_config['model']
+
+        load_ranges_count = 0
+        load_ranges_failed = 0
+
+        scraper_ranges = self.register_ranges
+        # Use a dynamically compiled list of address ranges instead of the
+        # configured one, if the dyna_scan option has been enabled:
+        if self.inverter_config['dyna_scan']:
+            scraper_ranges = self.build_dyna_scan_address_ranges()
+
+        for range in scraper_ranges:
+            load_ranges_count +=1
+            logging.debug(f"Reading data {load_ranges_count} of {len(scraper_ranges)}, " \
+                    + f"type ´{range.get('type')}`, range ´{range.get('start')}:{range.get('range')}`")
+            if not self.load_registers(range.get('type'),
+                                       int(range.get('start')),
+                                       int(range.get('range'))):
+                load_ranges_failed +=1
+        if load_ranges_failed == load_ranges_count:
+            # If every scrape fails, disconnect the client
+            #logging.warning
+            self.disconnect()
+            return False
+        if load_ranges_failed > 0:
+            logging.warning(f'Reading: Failed to read some ranges'
+                            + f"({load_ranges_failed} of {load_ranges_count})!")
+
+        # Leave connection open, see if helps resolve the connection issues
+        #self.close()
+
+        self.do_field_post_processing()
+
+        scrape_end = datetime.now()
+        logging.info(f'Finished reading ranges of data from inverter '
+                     + f"in {(scrape_end - scrape_start).seconds}."
+                     + f"{(scrape_end - scrape_start).microseconds}"
+                     + f"seconds.")
+
+        return True
+
+
+    def do_field_post_processing(self):
+        if self.field_post_processor is not None:
+            self.field_post_processor.evaluate(self.latest_scrape)
+
+
+
+    def print_register_list(self):
+        print("+---------------------------------------------------------------------------+")
+        print("| List of registers which are read from the inverter.                       |")
+        print("| The list is filtered according to the level and model support.            |")
+        print("+--------------------------------------------+-------+------+-------+-------+")
+        print("| {:<42} | {:^5} | {:<4} | {:<5} | {:<5} |".format('register name', 'unit', 'type', 'freq.', 'addr.'))
+        print("+--------------------------------------------+-------+------+-------+-------+")
+        for reg in self.registers:
+            print("| {:<42} | {:^5} | {:<4} | {:<5} | {:<5} |".format(reg.get("name"), reg.get("unit",""), reg.get("type"), reg.get("update_frequency", ""), reg.get("address", "----")))
+        print("+--------------------------------------------+-------+------+-------+-------+")
+
+
+class SungrowClient(SungrowClientCore):
+
+    # This class implements the behavior as in the original SunGather. Its main
+    # responsibility is the creation of custom registers in code. The remainder
+    # of the behavior has been factored into ist super class for separation.
+
+    # The creation of customer registers in code is considered deprecated in
+    # this fork. It can be replaced by configurable custom registers.
+
+    def __init__(self, config_inverter):
+        super().__init__(config_inverter)
+        self.registers_custom = [   {'name': 'run_state', 'address': 'vr001'},
+                                    {'name': 'timestamp', 'address': 'vr002'},
+                                    {'name': 'last_reset', 'address': 'vr003'},
+                                    {'name': 'export_to_grid', 'unit': 'W', 'address': 'vr004'}, 
+                                    {'name': 'import_from_grid', 'unit': 'W', 'address': 'vr005'}, 
+                                    {'name': 'daily_export_to_grid', 'unit': 'kWh', 'address': 'vr006'}, 
+                                    {'name': 'daily_import_from_grid', 'unit': 'kWh', 'address': 'vr007'}
+                                ]
+
+    def get_my_register_list(self):
+        the_super_list = super().get_my_register_list()
+        return [*the_super_list, *self.registers_custom]
+
+    def init_latest_scrape(self):
+        persist_registers = {
+            "run_state":                self.latest_scrape.get("run_state","ON"),
+            "last_reset":               self.latest_scrape.get("last_reset",""),
+            "daily_export_to_grid":     self.latest_scrape.get("daily_export_to_grid",0),
+            "daily_import_from_grid":   self.latest_scrape.get("daily_import_from_grid",0),
+        }
+        self.latest_scrape = {}
+        for register, value in persist_registers.items():
+            self.latest_scrape[register] = value
+
     def persist_registers_from_previous_scrape(self):
         # some custom registers are derived using values from the current and - if available - the previous scrape.
         # Conserve any previous values already existing or initialize if not yet present.
-        if not self.inverter_config['disable_custom_registers']:
-            persist_registers = {
-                "run_state":                self.latest_scrape.get("run_state","ON"),
-                "last_reset":               self.latest_scrape.get("last_reset",""),
-                "daily_export_to_grid":     self.latest_scrape.get("daily_export_to_grid",0),
-                "daily_import_from_grid":   self.latest_scrape.get("daily_import_from_grid",0),
-            }
-        else:
-            persist_registers = None
-
+        persist_registers = {
+            "run_state":                self.latest_scrape.get("run_state","ON"),
+            "last_reset":               self.latest_scrape.get("last_reset",""),
+            "daily_export_to_grid":     self.latest_scrape.get("daily_export_to_grid",0),
+            "daily_import_from_grid":   self.latest_scrape.get("daily_import_from_grid",0),
+        }
         return persist_registers
 
+    def do_field_post_processing(self):
+        super().do_field_post_processing()
+        self.convert_time_fields_to_timestamp()
+        # If alarm state exists then convert to timestamp, otherwise remove it
+        self.convert_alarm_time_fields_to_timestamp()
+        # derive custom registers from scraped values if required:
+        self.create_custom_registers()
+        DerivedRegisters(self).calc()
 
     def convert_alarm_time_fields_to_timestamp(self):
         if self.latest_scrape.get("pid_alarm_code"):
@@ -593,6 +696,9 @@ class SungrowClient():
         try:
             if self.latest_scrape.get('start_stop'):
                 logging.debug(f"start_stop:{self.latest_scrape.get('start_stop', 'null')} work_state_1:{self.latest_scrape.get('work_state_1', 'null')}")    
+                # The next line of code is broken and will throw an exception. This is a coding error which is completely obscured by the except block below.
+                # The original intention of this code is not sufficiently clear to actually fix it.
+                # The effect of this error is that run_state will always stay on its initialized value of 'ON'.
                 if self.latest_scrape.get('start_stop', False) == 'Start' and self.latest_scrape.get('work_state_1', False).contains('Run'):
                     self.latest_scrape["run_state"] = "ON"
                 else:
@@ -661,95 +767,4 @@ class SungrowClient():
             self.latest_scrape["daily_import_from_grid"] = 0       
 
         self.latest_scrape["daily_import_from_grid"] += ((self.latest_scrape["import_from_grid"] / 1000) * (self.inverter_config['scan_interval'] / 60 / 60) )
-
-
-    def init_latest_scrape(self):
-        persisted = self.persist_registers_from_previous_scrape()
-
-        # initialize the current scrape:
-        self.latest_scrape = {}
-
-        # copy the persisted values into the current scrape:
-        if persisted is not None:
-            for register, value in persisted.items():
-                self.latest_scrape[register] = value
-
-
-    def scrape(self):
-        logging.info(f"Start reading ranges of data from inverter.")
-        scrape_start = datetime.now()
-
-        self.init_latest_scrape()
-
-        # Note that using the value from the inverter config means that if the
-        # model has been configured, it will actually never be read from the
-        # inverter:
-        self.latest_scrape['device_type_code'] = self.inverter_config['model']
-
-        load_ranges_count = 0
-        load_ranges_failed = 0
-
-        scraper_ranges = self.register_ranges
-        # Use a dynamically compiled list of address ranges instead of the
-        # configured one, if the dyna_scan option has been enabled:
-        if self.inverter_config['dyna_scan']:
-            scraper_ranges = self.build_dyna_scan_address_ranges()
-
-        for range in scraper_ranges:
-            load_ranges_count +=1
-            logging.debug(f"Reading data {load_ranges_count} of {len(scraper_ranges)}, " \
-                    + f"type ´{range.get('type')}`, range ´{range.get('start')}:{range.get('range')}`")
-            if not self.load_registers(range.get('type'),
-                                       int(range.get('start')),
-                                       int(range.get('range'))):
-                load_ranges_failed +=1
-        if load_ranges_failed == load_ranges_count:
-            # If every scrape fails, disconnect the client
-            #logging.warning
-            self.disconnect()
-            return False
-        if load_ranges_failed > 0:
-            logging.warning(f'Reading: Failed to read some ranges'
-                            + f"({load_ranges_failed} of {load_ranges_count})!")
-
-        # Leave connection open, see if helps resolve the connection issues
-        #self.close()
-
-        self.convert_time_fields_to_timestamp()
-
-        # If alarm state exists then convert to timestamp, otherwise remove it
-        self.convert_alarm_time_fields_to_timestamp()
-
-        self.do_field_post_processing()
-
-        scrape_end = datetime.now()
-        logging.info(f'Finished reading ranges of data from inverter '
-                     + f"in {(scrape_end - scrape_start).seconds}."
-                     + f"{(scrape_end - scrape_start).microseconds}"
-                     + f"seconds.")
-
-        return True
-
-
-    def do_field_post_processing(self):
-        # derive custom registers from scraped values if required:
-        if not self.inverter_config.get('disable_custom_registers'):
-            self.create_custom_registers()
-            DerivedRegisters(self).calc()
-        if self.field_post_processor is not None:
-            self.field_post_processor.evaluate(self.latest_scrape)
-
-
-
-    def print_register_list(self):
-        print("+---------------------------------------------------------------------------+")
-        print("| List of registers which are read from the inverter.                       |")
-        print("| The list is filtered according to the level and model support.            |")
-        print("+--------------------------------------------+-------+------+-------+-------+")
-        print("| {:<42} | {:^5} | {:<4} | {:<5} | {:<5} |".format('register name', 'unit', 'type', 'freq.', 'addr.'))
-        print("+--------------------------------------------+-------+------+-------+-------+")
-        for reg in self.registers:
-            print("| {:<42} | {:^5} | {:<4} | {:<5} | {:<5} |".format(reg.get("name"), reg.get("unit",""), reg.get("type"), reg.get("update_frequency", ""), reg.get("address", "----")))
-        print("+--------------------------------------------+-------+------+-------+-------+")
-
 
