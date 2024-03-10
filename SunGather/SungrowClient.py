@@ -4,7 +4,6 @@ from SungrowModbusTcpClient import SungrowModbusTcpClient
 from SungrowModbusWebClient import SungrowModbusWebClient
 from pymodbus.client.sync import ModbusTcpClient
 
-from DerivedRegisters import DerivedRegisters
 from FieldPostProcessor import FieldPostProcessor
 
 from datetime import datetime
@@ -639,7 +638,6 @@ class SungrowClient(SungrowClientCore):
         self.convert_alarm_time_fields_to_timestamp()
         # derive custom registers from scraped values if required:
         self.create_custom_registers()
-        DerivedRegisters(self).calc()
 
     def convert_alarm_time_fields_to_timestamp(self):
         if self.latest_scrape.get("pid_alarm_code"):
