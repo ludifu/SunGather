@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 import logging
-import yaml
 
 from datetime import datetime
 from datetime import date
@@ -361,13 +360,13 @@ class CodeObjectFactory:
         unit = config.get("unit")
         ignore_msg = f"Ingnored config entry ´{config}`: "
         if name is None:
-            logging.error(ignore_msg + f"name is required.")
+            logging.error(ignore_msg + "name is required.")
             return None
         if stmt:
             if guard or wrtm or aggr or expr or flbk:
                 logging.error(
                     ignore_msg
-                    + f"guard, expression, aggregate, write_mode, fallback not allowed in combination with statement."
+                    + "guard, expression, aggregate, write_mode, fallback not allowed in combination with statement."
                 )
                 return None
             else:
@@ -379,12 +378,12 @@ class CodeObjectFactory:
         elif expr:
             if aggr and aggr not in ["daily", "total"]:
                 logging.error(
-                    ignore_msg + f"aggregation must be one of ´daily` or ´total`."
+                    ignore_msg + "aggregation must be one of ´daily` or ´total`."
                 )
                 return None
             if wrtm and wrtm not in ["replace_only", "new_only"]:
                 logging.error(
-                    ignore_msg + f" write_mode must be ´replace_only` or ´new_only`."
+                    ignore_msg + " write_mode must be ´replace_only` or ´new_only`."
                 )
                 return None
             if aggr:
@@ -407,7 +406,7 @@ class CodeObjectFactory:
                     unit=unit,
                 )
         else:
-            logging.error(ignore_msg + f"expression or statement required.")
+            logging.error(ignore_msg + "expression or statement required.")
             return None
 
 

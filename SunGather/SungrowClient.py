@@ -54,7 +54,8 @@ class SungrowClientCore():
         if self.client:
             try:
                 self.client.connect()
-            except:
+            except Exception as err:
+                logging.error(f"Error on trying to connect to the inverter: {err}")
                 return False
             return True
 
@@ -72,7 +73,8 @@ class SungrowClientCore():
 
         try:
             self.client.connect()
-        except:
+        except Exception as err:
+            logging.error(f"Error on trying to connect to the inverter: {err}")
             return False
 
         time.sleep(3)       # Wait 3 seconds, fixes timing issues
@@ -85,10 +87,10 @@ class SungrowClientCore():
                 logging.debug("... Modbus session is still connected.")
                 return True
             else:
-                logging.debug(f'... Modbus session disconnected, connecting new session.')
+                logging.debug('... Modbus session disconnected, connecting new session.')
                 return self.connect()
         else:
-            logging.debug(f'... Client is not connected, attempting to reconnect.')
+            logging.debug('... Client is not connected, attempting to reconnect.')
             return self.connect()
 
     def close(self):
@@ -97,14 +99,15 @@ class SungrowClientCore():
         logging.debug("Closing Session: " + str(self.client))
         try:
             self.client.close()
-        except:
-            pass
+        except Exception as err:
+            logging.error(f"Error on trying to close connection to the inverter: {err}")
 
     def disconnect(self):
         logging.debug("Disconnecting: " + str(self.client))
         try:
             self.client.close()
-        except:
+        except Exception as err:
+            logging.error(f"Error on trying to disconnect from the inverter: {err}")
             pass
         self.client = None
 
@@ -156,7 +159,7 @@ class SungrowClientCore():
     def detect_model(self,registersfile):
         result = self.load_single_register("device_type_code", 'read', registersfile)
         if not result:
-            logging.warning(f'Model detection failed, please set model in config.py!')
+            logging.warning('Model detection failed, please set model in config.py!')
         elif isinstance(result, int):
             logging.warning(f"Unknown model type code detected: ´{result}`.")
         else:
@@ -169,14 +172,14 @@ class SungrowClientCore():
         if self.inverter_config.get('model'):
             logging.info(f"Model configured: ´{self.inverter_config.get('model')}`.")
         else:
-            logging.info(f"Model not configured, trying to detect model ...")
+            logging.info("Model not configured, trying to detect model ...")
             self.detect_model(registersfile)
 
 
     def detect_serial(self,registersfile):
         result = self.load_single_register("serial_number", 'read', registersfile)
         if not result:
-            logging.warning(f'Serial detection failed, please set serial number in config.py!')
+            logging.warning('Serial detection failed, please set serial number in config.py!')
         elif isinstance(result, int):
             logging.warning(f"Unknown result for serial number detected: ´{result}`.")
         else:
@@ -189,7 +192,7 @@ class SungrowClientCore():
         if self.inverter_config.get('serial_number', None) is not None:
             logging.info(f"Serial number configured: ´{self.inverter_config.get('serial_number')}`.")
         else:
-            logging.info(f"Serial number not configured, trying to detect serial number ...")
+            logging.info("Serial number not configured, trying to detect serial number ...")
             self.detect_serial(registersfile)
 
 
@@ -283,7 +286,7 @@ class SungrowClientCore():
             return None
 
         if rr.isError():
-            logging.warning(f"Modbus connection failed!")
+            logging.warning("Modbus connection failed!")
             logging.debug(f"{rr}")
             return  None
 
@@ -484,12 +487,11 @@ class SungrowClientCore():
                 # has been within the configured update_frequency:
                 if reg.get("update_frequency") and reg.get("last_update"):
                     logging.debug(f"Register {reg.get('name')} has update_frequency = {reg.get('update_frequency')} and last_update = {reg.get('last_update')}.")
-                    if (datetime.now() - reg["last_update"]).total_seconds() < reg.get("update_frequency"):
+                    if (timenow - reg["last_update"]).total_seconds() < reg.get("update_frequency"):
                         logging.debug(f"Dropping register {reg.get('name')} from dynamically build scrape range due to update frequency.")
                         continue
                 reg_addr =  reg.get("address")
                 reg_len = self.register_length(reg)
-                reg_datatype = reg.get("datatype")
                 if (range_start == 0):
                     range_start = reg_addr # start a new range
                     range_end = reg_addr + reg_len - 1
@@ -517,7 +519,7 @@ class SungrowClientCore():
 
 
     def scrape(self):
-        logging.info(f"Start reading ranges of data from inverter.")
+        logging.info("Start reading ranges of data from inverter.")
         scrape_start = datetime.now()
 
         self.init_latest_scrape()
@@ -550,7 +552,7 @@ class SungrowClientCore():
             self.disconnect()
             return False
         if load_ranges_failed > 0:
-            logging.warning(f'Reading: Failed to read some ranges'
+            logging.warning('Reading: Failed to read some ranges'
                             + f"({load_ranges_failed} of {load_ranges_count})!")
 
         # Leave connection open, see if helps resolve the connection issues
@@ -559,10 +561,10 @@ class SungrowClientCore():
         self.do_field_post_processing()
 
         scrape_end = datetime.now()
-        logging.info(f'Finished reading ranges of data from inverter '
+        logging.info('Finished reading ranges of data from inverter '
                      + f"in {(scrape_end - scrape_start).seconds}."
                      + f"{(scrape_end - scrape_start).microseconds}"
-                     + f"seconds.")
+                     + "seconds.")
 
         return True
 
@@ -652,7 +654,7 @@ class SungrowClient(SungrowClientCore):
                 )   
             except Exception:
                 self.latest_scrape["alarm_timestamp"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                logging.exception(f"Converting fields for alarm time into "
+                logging.exception("Converting fields for alarm time into "
                                   + "timestamp failed! Substituting values "
                                   + "from inverter by local timestamp.")
             finally:
@@ -702,7 +704,7 @@ class SungrowClient(SungrowClientCore):
                 else:
                     self.latest_scrape["run_state"] = "OFF"
             else:
-                logging.debug(f"Couldn't read start_stop so run_state is OFF")    
+                logging.debug("Couldn't read start_stop so run_state is OFF")    
                 self.latest_scrape["run_state"] = "OFF"
         except Exception:
             pass

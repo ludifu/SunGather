@@ -12,8 +12,6 @@ import sys
 import getopt
 import yaml
 import time
-import re
-import os
 
 
 def main():
@@ -65,12 +63,12 @@ def read_arguments_from_commandline():
         opts, args = getopt.getopt(sys.argv[1:], "hc:r:l:v:", ["runonce", "help"])
     except getopt.GetoptError:
         logging.error(
-            f"Error parsing command line! Run with option ´-h` to show usage information."
+            "Error parsing command line! Run with option ´-h` to show usage information."
         )
         sys.exit(2)
 
     if opts and len(opts) == 0:
-        logging.debug(f"No options passed via command line")
+        logging.debug("No options passed via command line")
         return app_args
 
     for opt, arg in opts:
@@ -89,7 +87,7 @@ def read_arguments_from_commandline():
             else:
                 # Note: The default of 30 only applies, if the log level has not been set in the config file.
                 logging.error(
-                    f"Valid verbose options: 10 = Debug, 20 = Info, 30 = Warning (default), 40 = Error"
+                    "Valid verbose options: 10 = Debug, 20 = Info, 30 = Warning (default), 40 = Error"
                 )
                 sys.exit(2)
         elif opt == "--runonce":
@@ -100,18 +98,18 @@ def read_arguments_from_commandline():
 
 def print_synopsis():
     print(f"\nSunGatherEvo {__version__}")
-    print(f"usage: python3 sungather.py [options]")
-    print(f"\nCommandline arguments override any config file settings.")
-    print(f"Options and arguments:")
-    print(f"-c config.yaml          : Specify config file.")
-    print(f"-r registers-file.yaml  : Specify registers file.")
-    print(f"-l logs/                : Specify folder to store logs.")
-    print(f"-v 30                   : Logging Level")
-    print(f"                          10 = Debug, 20 = Info, 30 = Warning, 40 = Error")
-    print(f"--runonce               : Run once then exit.")
-    print(f"-h                      : print this help message and exit.")
-    print(f"\nExample:")
-    print(f"python3 sungather.py -c /full/path/config.yaml\n")
+    print("usage: python3 sungather.py [options]")
+    print("\nCommandline arguments override any config file settings.")
+    print("Options and arguments:")
+    print("-c config.yaml          : Specify config file.")
+    print("-r registers-file.yaml  : Specify registers file.")
+    print("-l logs/                : Specify folder to store logs.")
+    print("-v 30                   : Logging Level")
+    print("                          10 = Debug, 20 = Info, 30 = Warning, 40 = Error")
+    print("--runonce               : Run once then exit.")
+    print("-h                      : print this help message and exit.")
+    print("\nExample:")
+    print("python3 sungather.py -c /full/path/config.yaml\n")
 
 
 def load_config_file(configfilename):
@@ -122,7 +120,7 @@ def load_config_file(configfilename):
         logging.exception(f"Failed loading config: {configfilename} \n\t\t\t     {err}")
         sys.exit(1)
     if not configfile.get("inverter"):
-        logging.critical(f"Failed loading config, missing Inverter settings")
+        logging.critical("Failed loading config, missing Inverter settings")
         sys.exit(1)
 
     return configfile
@@ -154,15 +152,15 @@ def get_inverter_config(app_configuration):
 
 
 def print_welcome_message(app_args, inverter_configuration):
-    logging.info(f"##################################################################")
+    logging.info("##################################################################")
     logging.info(f"Starting SunGatherEvo {__version__}")
     logging.debug(f"Options (defaults if not modified by arguments): {app_args}")
     logging.debug(f"Inverter Config Loaded: {inverter_configuration}")
-    logging.info(f"##################################################################")
+    logging.info("##################################################################")
 
 
 def check_config(app_config, inverter_config):
-    if not inverter_config["log_file"] in [
+    if inverter_config["log_file"] not in [
         "OFF",
         "DEBUG",
         "INFO",
@@ -170,10 +168,10 @@ def check_config(app_config, inverter_config):
         "ERROR",
     ]:
         logging.warning(
-            f"log_file: Valid options are: DEBUG, INFO, WARNING, ERROR and OFF"
+            "log_file: Valid options are: DEBUG, INFO, WARNING, ERROR and OFF"
         )
 
-    if not inverter_config["connection"] in ["http", "sungrow", "modbus"]:
+    if inverter_config["connection"] not in ["http", "sungrow", "modbus"]:
         logging.critical(
             f"Unknown connection type ´{inverter_config['connection']}`, "
             + "Valid options are ´http`, ´sungrow` or ´modbus`!"
@@ -212,7 +210,7 @@ def setup_exports(app_configuration, inverter):
     # Note that exports may fail during configuration if data cannot be
     # read from the inverter!
     exports = []
-    logging.info(f"Start loading exports ...")
+    logging.info("Start loading exports ...")
     export_config_section = app_configuration.get("exports")
     for exportconfig in export_config_section:
         export_loaded = load_one_export(exportconfig, inverter)
@@ -221,13 +219,13 @@ def setup_exports(app_configuration, inverter):
     # Fall back to console if nothing else was configured.
     if len(exports) == 0:
         logging.warning(
-            f"No exports were configured or enabled. Falling back to console export."
+            "No exports were configured or enabled. Falling back to console export."
         )
         export_loaded = load_one_export({"name": "console", "enabled": True}, inverter)
         if export_loaded is not None:
             exports.append(export_loaded)
         else:
-            logging.critical(f"Fallback to export ´console` failed, exiting.")
+            logging.critical("Fallback to export ´console` failed, exiting.")
             sys.exit(1)
     return exports
 
@@ -261,7 +259,7 @@ def load_one_export(export, inverter):
 
 def core_loop(inverter, exports, interval, runonce):
     while True:
-        logging.info(f"Starting scrape ...")
+        logging.info("Starting scrape ...")
         loop_start = time.perf_counter()
 
         inverter.checkConnection()
@@ -269,7 +267,7 @@ def core_loop(inverter, exports, interval, runonce):
         scrape_and_export_once(inverter, exports)
 
         if runonce:
-            logging.info(f"Option ´--runonce` was specified, exiting.")
+            logging.info("Option ´--runonce` was specified, exiting.")
             sys.exit(0)
 
         loop_end = time.perf_counter()
@@ -305,7 +303,7 @@ def scrape_and_export_once(inverter, exports):
         inverter.close()
     else:
         inverter.disconnect()
-        logging.warning(f"Data collection failed, skipped exporting data.")
+        logging.warning("Data collection failed, skipped exporting data.")
 
 
 #######################################################################
@@ -340,8 +338,8 @@ def setup_log_levels_and_log_file(loglevel, logfolder, lvl_file, lvl_console):
             )  # Log 10mb files, 10 x files = 100mb
         except IOError as ioe:
             logging.error(
-                f"Error setting up log file. "
-                + f"Logging to file could not be enabled. "
+                "Error setting up log file. "
+                + "Logging to file could not be enabled. "
                 + f"The original error was: {ioe}"
             )
         else:
