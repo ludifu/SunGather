@@ -21,12 +21,10 @@ from datetime import date
 
 
 class AbstractCode:
-
     # This class is the common ancestor for all classes representing
     # expressions and statements.  It should not be instantiated.
 
     def __init__(self, name, source, unit=None):
-
         # All kinds of AbstractCode objects have a name. The name is always
         # used as a field name.
         self.name = name
@@ -110,7 +108,6 @@ class AbstractCode:
 
 
 class FieldStatement(AbstractCode):
-
     # This class represents a block of arbitrary code - technically a statement
     # (in contrast to an expression). It is intended to store one or more custom
     # field values into the results, but the scope is not limited to this.
@@ -147,7 +144,6 @@ class FieldStatement(AbstractCode):
 
 
 class SimpleExpression(AbstractCode):
-
     def get_source_kind(self):
         return "eval"
 
@@ -163,7 +159,6 @@ class SimpleExpression(AbstractCode):
 
 
 class FieldExpression(SimpleExpression):
-
     # This class represents a python expression for calculating a named custom
     # field. The source is required to return a value. FieldExpression
     # instances use the name attribute to store the entries in the values
@@ -238,7 +233,6 @@ class FieldExpression(SimpleExpression):
 
 
 class AggregatingFieldExpression(FieldExpression):
-
     # This class will add the values calculated by its expression to a running
     # total. This can optionally be reset on a daily basis resulting in daily
     # aggregated values. If the running value is not reset, it results in an
@@ -320,7 +314,6 @@ class AggregatingFieldExpression(FieldExpression):
 
 
 class GuardExpression(SimpleExpression):
-
     # This class is an extension of SimpleExpression and will return False on
     # evaluation instead of None even if the execution fails, thereby providing
     # a fail safe behavior.
@@ -340,7 +333,6 @@ class GuardExpression(SimpleExpression):
 
 
 class CodeObjectFactory:
-
     # The responsibility of this class is to create an instance of a suitable
     # class for a custom field definition entry. It has only one class method.
     # Instantiation of this class is not required.
@@ -411,7 +403,6 @@ class CodeObjectFactory:
 
 
 class FieldPostProcessor:
-
     def __init__(self, cf_definitions):
         self.expressions = []
         if cf_definitions is not None:

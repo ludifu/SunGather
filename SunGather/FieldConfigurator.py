@@ -7,9 +7,7 @@ import sys
 
 
 class FieldConfigurator:
-
     def __init__(self, registers_filename, register_patch_config=None):
-
         # Filename of the yaml file to read register definitions from
         self.registers_filename = registers_filename
 

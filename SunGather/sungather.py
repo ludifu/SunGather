@@ -180,7 +180,6 @@ def check_config(app_config, inverter_config):
 
 
 def setup_inverter(inverter_config, register_configuration):
-
     if inverter_config.get("disable_custom_registers"):
         inverter = SungrowClientCore(inverter_config)
     else:
