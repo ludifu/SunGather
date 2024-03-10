@@ -5,20 +5,6 @@ import logging
 from datetime import datetime
 from datetime import date
 
-"""
-    fm = FieldPostProcessor(config_filename="xf.yaml")
-    #fm = FieldPostProcessor(config=[{'field': 'load_doubled', 'expression': 'load_power_hybrid * 2'}])
-
-    fm.evaluate({'export_to_grid': 1000, 'meter_power': 100, 'total_active_power': 200, 'work_state_1': 'Run', 'start_stop': 'False', 'year': 2024, 'month': 2, 'day': 23, 'hour': 10, 'minute': 12, 'second': 44})
-    time.sleep(10)
-
-    fm.evaluate({'export_to_grid': 1000, 'meter_power': 100, 'total_active_power': 200, 'work_state_1': 'Run', 'start_stop': 'Fe'})
-    time.sleep(10)
-
-    fm.evaluate({'export_to_grid': 1000, 'meter_power': 100, 'total_active_power': 200})
-    time.sleep(10)
-"""
-
 
 class AbstractCode:
     # This class is the common ancestor for all classes representing

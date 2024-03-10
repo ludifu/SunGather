@@ -185,47 +185,49 @@ class FieldConfigurator:
 
     def print_register_list(self):
         print(
-            "+-------------------------------------------------------------------------------+"
+            "+-------------------------------------------------------------------------------------+"
         )
         print(
-            "| Register definitions after applying patches.                                  |"
+            "| Register definitions after applying patches.                                        |"
         )
         print(
-            "| Note: The list is not (yet) filtered by supported models!                     |"
+            "| Note: The list is not (yet) filtered by supported models!                           |"
         )
         print(
-            "+--------------------------------------------+-------+------+-------+-------+---+"
+            "+--------------------------------------------+-------+------+-------+-------+---+-----+"
         )
         print(
-            "| {:<42} | {:^5} | {:<4} | {:<5} | {:<5} |{:^3}|".format(
-                "register name", "unit", "type", "freq.", "addr", "lvl"
+                "| {:<42} | {:^5} | {:<4} | {:<5} | {:<5} |{:^3}|{:^5}|".format(
+                "register name", "unit", "type", "freq.", "addr", "lvl", "slave"
             )
         )
         print(
-            "+--------------------------------------------+-------+------+-------+-------+---+"
+            "+--------------------------------------------+-------+------+-------+-------+---+-----+"
         )
         for reg in self.registers["registers"][0]["read"]:
             print(
-                "| {:<42} | {:^5} | {:<4} | {:>5} | {:>5} |{:^3}|".format(
+                    "| {:<42} | {:^5} | {:<4} | {:>5} | {:>5} |{:^3}| {:^3} |".format(
                     reg.get("name"),
                     reg.get("unit", ""),
                     "read",
                     reg.get("update_frequency", ""),
                     reg.get("address", "-----"),
                     reg.get("level", "-"),
+                    reg.get("slave", " "),
                 )
             )
         for reg in self.registers["registers"][1]["hold"]:
             print(
-                "| {:<42} | {:^5} | {:<4} | {:>5} | {:>5} |{:^3}|".format(
+                    "| {:<42} | {:^5} | {:<4} | {:>5} | {:>5} |{:^3}| {:^3} |".format(
                     reg.get("name"),
                     reg.get("unit", ""),
                     "hold",
                     reg.get("update_frequency", ""),
                     reg.get("address", "-----"),
                     reg.get("level", "-"),
+                    reg.get("slave", " "),
                 )
             )
         print(
-            "+--------------------------------------------+-------+------+-------+-------+---+"
+            "+--------------------------------------------+-------+------+-------+-------+---+-----+"
         )
