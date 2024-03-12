@@ -143,8 +143,8 @@ def get_inverter_config(app_configuration):
         "level": app_configuration["inverter"].get("level", 1),
         "dyna_scan": app_configuration["inverter"].get("dyna_scan", False),
         "serial_number": app_configuration["inverter"].get("serial", None),
-        "disable_custom_registers": app_configuration["inverter"].get(
-            "disable_custom_registers", False
+        "disable_legacy_custom_registers": app_configuration["inverter"].get(
+            "disable_legacy_custom_registers", False
         ),
         "customfields": app_configuration["inverter"].get("customfields", []),
     }
@@ -180,7 +180,7 @@ def check_config(app_config, inverter_config):
 
 
 def setup_inverter(inverter_config, register_configuration):
-    if inverter_config.get("disable_custom_registers"):
+    if inverter_config.get("disable_legacy_custom_registers"):
         inverter = SungrowClientCore(inverter_config)
     else:
         inverter = SungrowClient(inverter_config)
