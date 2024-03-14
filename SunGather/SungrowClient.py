@@ -130,7 +130,7 @@ class SungrowClientCore():
         return reg_len
 
 
-    def load_single_register(self, reg_name, reg_type, slave, registersfile):
+    def load_single_register(self, reg_name, reg_type, registersfile):
         # load a single register from the inverter and return the register value.
         if reg_type == 'read':
             reg_list = registersfile['registers'][0]['read']
@@ -148,7 +148,7 @@ class SungrowClientCore():
             logging.warning(f"Failed loading register ´{reg_name}` of type ´{reg_type}`, slave ´{slave}`. Register is not defined or address is missing in the register definition!")
             return None
 
-        success = self.load_registers(reg_type, slave, reg_address -1, reg_len) # Needs to be address -1
+        success = self.load_registers(reg_type, self.inverter_config['slave'], reg_address -1, reg_len) # Needs to be address -1
         self.registers.pop()
         if not success:
             logging.warning(f"Failed loading register ´{reg_name}` of type ´{reg_type}`, slave ´{slave}`!")
@@ -157,7 +157,7 @@ class SungrowClientCore():
 
 
     def detect_model(self,registersfile):
-        result = self.load_single_register("device_type_code", 'read', 1, registersfile)
+        result = self.load_single_register("device_type_code", 'read', registersfile)
         if not result:
             logging.warning('Model detection failed, please set model in config file!')
         elif isinstance(result, int):
@@ -177,7 +177,7 @@ class SungrowClientCore():
 
 
     def detect_serial(self,registersfile):
-        result = self.load_single_register("serial_number", 'read', 1, registersfile)
+        result = self.load_single_register("serial_number", 'read', registersfile)
         if not result:
             logging.warning('Serial detection failed, please set serial number in config file!')
         elif isinstance(result, int):
@@ -471,7 +471,7 @@ class SungrowClientCore():
         # slave id of 1 as a default if a register has no slave id configured.
         slave_ids = set()
         for reg in self.registers:
-            slave_ids.add(reg.get("slave", 1))
+            slave_ids.add(reg.get("slave", self.inverter_config['slave']))
         return slave_ids
 
 
@@ -485,7 +485,7 @@ class SungrowClientCore():
         ranges = []
         for slave_id in self.get_slave_ids():
             # filter the list of registers by slave id:
-            registers_by_slave = list(filter(lambda x: x.get("slave", 1) == slave_id, self.registers))
+            registers_by_slave = list(filter(lambda x: x.get("slave", self.inverter_config['slave']) == slave_id, self.registers))
             for reg_type in ["read", "hold"]:
                 # extract the registers by type because every range may only contain registers of either "hold" or "read" type.
                 regs = list(filter(lambda x: x.get("type") == reg_type, registers_by_slave))
