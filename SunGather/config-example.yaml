@@ -7,7 +7,6 @@ inverter:
   # scan_interval: 30                       # [Optional] Default is 30
   # connection: modbus                      # [Optional] Default is modbus, options: modbus, sungrow, http
   # model: "SG7.0RT"                        # [Optional] This is autodetected on startup, only needed if detection issues or for testing
-                                            # See model list here: https://github.com/bohdan-s/SunGather#supported
   # serial: xxxxxxxxxx                      # [Optional] This is autodetected on startup, only needed if detection issues or for testing, used as a unique ID
   # smart_meter: True                       # [Optional] Default is False, Set to true if inverter supports reading grind / house consumption
   # use_local_time: False                   # [Optional] Default False, Uses Inventer time, if true it uses PC time when updating timestamps (e.g. PVOutput)
@@ -19,23 +18,394 @@ inverter:
                                             # 2 everything your Inverter supports, 
                                             # 3 Everything from every register 
 
-  # Correct datatype for all software_version registers and provide the correct length for serial_number.
-  # Telegraf users: Remember to add the fields device_type_code, model, serial_number, battery_serial_number, arm_software_version,
-  # battery_software_version, dsp_software_version into the json_string_fields array in your telegraf.conf!
-  # See https://docs.influxdata.com/telegraf/v1/data_formats/input/json/
+
+  # dyna_scan: True                         # Set to True for an optimization, required for reading battery registers (see below).
+
   register_patches:
+
+  # Correct datatype for all software_version registers and provide the correct
+  # length for serial_number.
+  
+  # Telegraf users: Remember to add the fields device_type_code, model,
+  # serial_number, battery_serial_number, arm_software_version,
+  # battery_software_version, dsp_software_version into the json_string_fields
+  # array in your telegraf.conf!
+  
+  # See https://docs.influxdata.com/telegraf/v1/data_formats/input/json/
+  
     - name: "serial_number"
       length: 10
     - name: ".*_software_version"
       length: 15
       datatype: "UTF-8"
 
+ # Battery registers ####################################################################################
+ # Uncomment to read battery registers. Requires dyna_scan set to True, see above!
+  
+#   - name: "battery_serial_number"
+#     level: 1
+#     address: 10711
+#     length: 10    # 10720 - (10711 - 1)
+#     datatype: "UTF-8"
+#     update_frequency: 34600 # once per hour
+#     slave: 200
+#     type: "read"
 
+#     # Example value: ´SBRBCU-S_22011.01.19`.
+#   - name: "battery_software_version"
+#     level: 1
+#     address: 10721
+#     length: 10    # 10730 - (10721 - 1)
+#     update_frequency: 34600 # once per hour
+#     datatype: "UTF-8"
+#     slave: 200
+#     type: "read"
 
-  # Disable the creation of hardcoded custom fields:
-  disable_custom_registers: True
+#   # Overall battery values, all of these are available from slave id 1 as well.
+#   - name: "battery_voltage_2xx"
+#     level: 2
+#     address: 10741
+#     datatype: "U16"
+#     accuracy: 0.1
+#     unit: "V"
+#     slave: 200
+#     type: "read"
+#   - name: "battery_current_2xx"
+#     level: 2
+#     address: 10742
+#     datatype: "U16"
+#     accuracy: 0.1
+#     unit: "A"
+#     slave: 200
+#     type: "read"
+#   - name: "battery_temperature_2xx"
+#     level: 2
+#     address: 10743
+#     datatype: "U16"
+#     accuracy: 0.1
+#     unit: "°C"
+#     update_frequency: 300 # once per 5 minutes
+#     slave: 200
+#     type: "read"
+#   - name: "battery_state_of_charge"
+#     level: 1
+#     address: 10744
+#     datatype: "U16"
+#     accuracy: 0.1
+#     unit: "%"
+#     slave: 200
+#     type: "read"
+#   # Also available from the inverter as ´battery_state_of_healthy`.
+#   - name: "battery_state_of_healthy_2xx"
+#     level: 2
+#     address: 10745
+#     datatype: "U16"
+#     unit: "%"
+#     update_frequency: 34600 # once per hour
+#     slave: 200
+#     type: "read"
 
+#   - name: "battery_total_charge_energy"
+#     level: 1
+#     address: 10746
+#     datatype: "U32"
+#     unit: "kWh"
+#     update_frequency: 300 # once per 5 minutes
+#     slave: 200
+#     type: "read"
+#   - name: "battery_total_discharge_energy"
+#     level: 1
+#     address: 10748
+#     datatype: "U32"
+#     unit: "kWh"
+#     update_frequency: 300 # once per 5 minutes
+#     slave: 200
+#     type: "read"
 
+#   # Purpose / meanings of values unknown.
+#   - name: "battery_status"
+#     level: 2
+#     address: 10750
+#     datatype: "U16"
+#     slave: 200
+#     type: "read"
+#   - name: "battery_integrity_status"
+#     level: 2
+#     address: 10751
+#     datatype: "U16"
+#     slave: 200
+#     type: "read"
+
+#   # maximum and minimum voltages of all cells and the respective positions of
+#   #the cells with max / min voltage.
+#   - name: "battery_cell_voltage_max"
+#     level: 1
+#     address: 10757
+#     datatype: "U16"
+#     accuracy: 0.1
+#     unit: "mV"
+#     slave: 200
+#     type: "read"
+#   - name: "battery_cell_voltage_max_pos"
+#     level: 1
+#     address: 10758
+#     datatype: "U16"
+#     slave: 200
+#     type: "read"
+#   - name: "battery_cell_voltage_min"
+#     level: 1
+#     address: 10759
+#     datatype: "U16"
+#     accuracy: 0.1
+#     unit: "mV"
+#     slave: 200
+#     type: "read"
+#   - name: "battery_cell_voltage_min_pos"
+#     level: 1
+#     address: 10760
+#     datatype: "U16"
+#     slave: 200
+#     type: "read"
+
+#   # max and min temperatures and the respective cell positions
+#   - name: "battery_cell_temperature_max"
+#     level: 1
+#     address: 10761
+#     datatype: "U16"
+#     accuracy: 0.1
+#     unit: "°C"
+#     update_frequency: 300 # once per 5 minutes
+#     slave: 200
+#     type: "read"
+#   - name: "battery_cell_temperature_max_pos"
+#     level: 1
+#     address: 10762
+#     datatype: "U16"
+#     update_frequency: 300 # once per 5 minutes
+#     slave: 200
+#     type: "read"
+#   - name: "battery_cell_temperature_min"
+#     level: 1
+#     address: 10763
+#     datatype: "U16"
+#     accuracy: 0.1
+#     unit: "°C"
+#     update_frequency: 300 # once per 5 minutes
+#     slave: 200
+#     type: "read"
+#   - name: "battery_cell_temperature_min_pos"
+#     level: 1
+#     address: 10764
+#     datatype: "U16"
+#     update_frequency: 300 # once per 5 minutes
+#     slave: 200
+#     type: "read"
+
+#   # max and min cell voltages broken down to single modules
+#   - name: "battery_cell_voltage_max_1"
+#     level: 1
+#     address: 10765
+#     datatype: "U16"
+#     accuracy: 0.1
+#     unit: "mV"
+#     slave: 200
+#     type: "read"
+#   - name: "battery_cell_voltage_max_2"
+#     level: 1
+#     address: 10766
+#     datatype: "U16"
+#     accuracy: 0.1
+#     unit: "mV"
+#     slave: 200
+#     type: "read"
+#   - name: "battery_cell_voltage_max_3"
+#     level: 1
+#     address: 10767
+#     datatype: "U16"
+#     accuracy: 0.1
+#     unit: "mV"
+#     slave: 200
+#     type: "read"
+#   - name: "battery_cell_voltage_max_4"
+#     level: 1
+#     address: 10768
+#     datatype: "U16"
+#     accuracy: 0.1
+#     unit: "mV"
+#     slave: 200
+#     type: "read"
+#   - name: "battery_cell_voltage_max_5"
+#     level: 1
+#     address: 10769
+#     datatype: "U16"
+#     accuracy: 0.1
+#     unit: "mV"
+#     slave: 200
+#     type: "read"
+#   - name: "battery_cell_voltage_max_6"
+#     level: 1
+#     address: 10770
+#     datatype: "U16"
+#     accuracy: 0.1
+#     unit: "mV"
+#     slave: 200
+#     type: "read"
+#   - name: "battery_cell_voltage_max_7"
+#     level: 1
+#     address: 10771
+#     datatype: "U16"
+#     accuracy: 0.1
+#     unit: "mV"
+#     slave: 200
+#     type: "read"
+#   - name: "battery_cell_voltage_max_8"
+#     level: 1
+#     address: 10772
+#     datatype: "U16"
+#     accuracy: 0.1
+#     unit: "mV"
+#     slave: 200
+#     type: "read"
+
+#   - name: "battery_cell_voltage_min_1"
+#     level: 1
+#     address: 10773
+#     datatype: "U16"
+#     accuracy: 0.1
+#     unit: "mV"
+#     slave: 200
+#     type: "read"
+#   - name: "battery_cell_voltage_min_2"
+#     level: 1
+#     address: 10774
+#     datatype: "U16"
+#     accuracy: 0.1
+#     unit: "mV"
+#     slave: 200
+#     type: "read"
+#   - name: "battery_cell_voltage_min_3"
+#     level: 1
+#     address: 10775
+#     datatype: "U16"
+#     accuracy: 0.1
+#     unit: "mV"
+#     slave: 200
+#     type: "read"
+#   - name: "battery_cell_voltage_min_4"
+#     level: 1
+#     address: 10776
+#     datatype: "U16"
+#     accuracy: 0.1
+#     unit: "mV"
+#     slave: 200
+#     type: "read"
+#   - name: "battery_cell_voltage_min_5"
+#     level: 1
+#     address: 10777
+#     datatype: "U16"
+#     accuracy: 0.1
+#     unit: "mV"
+#     slave: 200
+#     type: "read"
+#   - name: "battery_cell_voltage_min_6"
+#     level: 1
+#     address: 10778
+#     datatype: "U16"
+#     accuracy: 0.1
+#     unit: "mV"
+#     slave: 200
+#     type: "read"
+#   - name: "battery_cell_voltage_min_7"
+#     level: 1
+#     address: 10779
+#     datatype: "U16"
+#     accuracy: 0.1
+#     unit: "mV"
+#     slave: 200
+#     type: "read"
+#   - name: "battery_cell_voltage_min_8"
+#     level: 1
+#     address: 10780
+#     datatype: "U16"
+#     accuracy: 0.1
+#     unit: "mV"
+#     slave: 200
+#     type: "read"
+
+#   # cell types of single modules
+#   # meaning of cell types is unclear, typical values are ´1` or ´0`.
+#   - name: "battery_cell_type_1"
+#     level: 1
+#     address: 10781
+#     datatype: "U16"
+#     update_frequency: 3600 # once per hour
+#     slave: 200
+#     type: "read"
+#   - name: "battery_cell_type_2"
+#     level: 1
+#     address: 10782
+#     datatype: "U16"
+#     update_frequency: 3600 # once per hour
+#     slave: 200
+#     type: "read"
+#   - name: "battery_cell_type_3"
+#     level: 1
+#     address: 10783
+#     datatype: "U16"
+#     update_frequency: 3600 # once per hour
+#     slave: 200
+#     type: "read"
+#   - name: "battery_cell_type_4"
+#     level: 1
+#     address: 10784
+#     datatype: "U16"
+#     update_frequency: 3600 # once per hour
+#     slave: 200
+#     type: "read"
+#   - name: "battery_cell_type_5"
+#     level: 1
+#     address: 10785
+#     datatype: "U16"
+#     update_frequency: 3600 # once per hour
+#     slave: 200
+#     type: "read"
+#   - name: "battery_cell_type_6"
+#     level: 1
+#     address: 10786
+#     datatype: "U16"
+#     update_frequency: 3600 # once per hour
+#     slave: 200
+#     type: "read"
+#   - name: "battery_cell_type_7"
+#     level: 1
+#     address: 10787
+#     datatype: "U16"
+#     update_frequency: 3600 # once per hour
+#     slave: 200
+#     type: "read"
+#   - name: "battery_cell_type_8"
+#     level: 1
+#     address: 10788
+#     datatype: "U16"
+#     update_frequency: 3600 # once per hour
+#     slave: 200
+#     type: "read"
+
+#   # state of DC switch.
+#   - name: "battery_state_dc_switch"
+#     level: 1
+#     address: 10789
+#     datatype: "U16"
+#     slave: 200
+#     type: "read"
+
+# # Battery registers ####################################################################################
+ 
+  
+ 
+
+  #disable_legacy_custom_registers: True    # Disable the creation of hardcoded custom fields.
+  
   customfields:
 
     # Create the original custom fields.

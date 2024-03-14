@@ -54,7 +54,8 @@ class SungrowClientCore():
         if self.client:
             try:
                 self.client.connect()
-            except:
+            except Exception as err:
+                logging.error(f"Error on trying to connect to the inverter: {err}")
                 return False
             return True
 
@@ -72,7 +73,8 @@ class SungrowClientCore():
 
         try:
             self.client.connect()
-        except:
+        except Exception as err:
+            logging.error(f"Error on trying to connect to the inverter: {err}")
             return False
 
         time.sleep(3)       # Wait 3 seconds, fixes timing issues
@@ -85,10 +87,10 @@ class SungrowClientCore():
                 logging.debug("... Modbus session is still connected.")
                 return True
             else:
-                logging.debug(f'... Modbus session disconnected, connecting new session.')
+                logging.debug('... Modbus session disconnected, connecting new session.')
                 return self.connect()
         else:
-            logging.debug(f'... Client is not connected, attempting to reconnect.')
+            logging.debug('... Client is not connected, attempting to reconnect.')
             return self.connect()
 
     def close(self):
@@ -97,14 +99,15 @@ class SungrowClientCore():
         logging.debug("Closing Session: " + str(self.client))
         try:
             self.client.close()
-        except:
-            pass
+        except Exception as err:
+            logging.error(f"Error on trying to close connection to the inverter: {err}")
 
     def disconnect(self):
         logging.debug("Disconnecting: " + str(self.client))
         try:
             self.client.close()
-        except:
+        except Exception as err:
+            logging.error(f"Error on trying to disconnect from the inverter: {err}")
             pass
         self.client = None
 
@@ -142,13 +145,13 @@ class SungrowClientCore():
                 self.registers.append(register)
                 break
         if reg_address is None:
-            logging.warning(f"Failed loading register ´{reg_name}` of type ´{reg_type}`. Register is not defined or address is missing in the register definition!")
+            logging.warning(f"Failed loading register ´{reg_name}` of type ´{reg_type}`, slave ´{slave}`. Register is not defined or address is missing in the register definition!")
             return None
 
-        success = self.load_registers(reg_type, reg_address -1, reg_len) # Needs to be address -1
+        success = self.load_registers(reg_type, self.inverter_config['slave'], reg_address -1, reg_len) # Needs to be address -1
         self.registers.pop()
         if not success:
-            logging.warning(f"Failed loading register ´{reg_name}` of type ´{reg_type}`!")
+            logging.warning(f"Failed loading register ´{reg_name}` of type ´{reg_type}`, slave ´{slave}`!")
             return None
         return self.latest_scrape.get(reg_name)
 
@@ -156,7 +159,7 @@ class SungrowClientCore():
     def detect_model(self,registersfile):
         result = self.load_single_register("device_type_code", 'read', registersfile)
         if not result:
-            logging.warning(f'Model detection failed, please set model in config.py!')
+            logging.warning('Model detection failed, please set model in config file!')
         elif isinstance(result, int):
             logging.warning(f"Unknown model type code detected: ´{result}`.")
         else:
@@ -169,14 +172,14 @@ class SungrowClientCore():
         if self.inverter_config.get('model'):
             logging.info(f"Model configured: ´{self.inverter_config.get('model')}`.")
         else:
-            logging.info(f"Model not configured, trying to detect model ...")
+            logging.info("Model not configured, trying to detect model ...")
             self.detect_model(registersfile)
 
 
     def detect_serial(self,registersfile):
         result = self.load_single_register("serial_number", 'read', registersfile)
         if not result:
-            logging.warning(f'Serial detection failed, please set serial number in config.py!')
+            logging.warning('Serial detection failed, please set serial number in config file!')
         elif isinstance(result, int):
             logging.warning(f"Unknown result for serial number detected: ´{result}`.")
         else:
@@ -189,7 +192,7 @@ class SungrowClientCore():
         if self.inverter_config.get('serial_number', None) is not None:
             logging.info(f"Serial number configured: ´{self.inverter_config.get('serial_number')}`.")
         else:
-            logging.info(f"Serial number not configured, trying to detect serial number ...")
+            logging.info("Serial number not configured, trying to detect serial number ...")
             self.detect_serial(registersfile)
 
 
@@ -267,23 +270,23 @@ class SungrowClientCore():
         return True
 
 
-    # read and return an address range beginning with start and with count registers from the inverter.
-    def read_input_registers(self, register_type, start, count):
+    def read_registers(self, register_type, slave, start, count):
+        # read and return an address range beginning with start and with count registers from the inverter.
         try:
-            logging.debug(f'read_input_registers: {register_type}, {start}:{count}')
+            logging.debug(f'read_registers: {register_type}, slave id ´{slave}`, {start}:{count}')
             if register_type == "read":
-                rr = self.client.read_input_registers(start,count=count, unit=self.inverter_config['slave'])
+                rr = self.client.read_input_registers(start,count=count, unit=slave)
             elif register_type == "hold":
-                rr = self.client.read_holding_registers(start,count=count, unit=self.inverter_config['slave'])
+                rr = self.client.read_holding_registers(start,count=count, unit=slave)
             else:
                 raise RuntimeError(f"Unsupported register type: {type}")
         except Exception as err:
-            logging.warning(f"No data returned for type ´{register_type}`, start {start}, count {count}")
+            logging.warning(f"No data returned for type ´{register_type}`, slave id ´{slave}`, start {start}, count {count}")
             logging.debug(f"(´{str(err)}`)")
             return None
 
         if rr.isError():
-            logging.warning(f"Modbus connection failed!")
+            logging.warning("Modbus connection failed!")
             logging.debug(f"{rr}")
             return  None
 
@@ -391,11 +394,11 @@ class SungrowClientCore():
         return register_value
 
 
-    def load_registers(self, register_type, start, count=100):
-        logging.info(f"Start reading a single range of data, type ´{register_type}`, start {start}, count {count}.")
+    def load_registers(self, register_type, slave_id, start, count=100):
+        logging.info(f"Start reading a single range of data, type ´{register_type}`, slave ´{slave_id}`, start {start}, count {count}.")
 
         # first read the data area containing the registers from the inverter.
-        rr = self.read_input_registers(register_type, start, count)
+        rr = self.read_registers(register_type, slave_id, start, count)
         if rr is None:
             return False
 
@@ -463,6 +466,15 @@ class SungrowClientCore():
         return self.inverter_config['serial_number']
 
 
+    def get_slave_ids(self):
+        # return a list of all slave ids which are used in any register. Assume
+        # slave id of 1 as a default if a register has no slave id configured.
+        slave_ids = set()
+        for reg in self.registers:
+            slave_ids.add(reg.get("slave", self.inverter_config['slave']))
+        return slave_ids
+
+
     def build_dyna_scan_address_ranges(self):
 
         # maximum length of an address range to read in one batch.  According
@@ -471,40 +483,42 @@ class SungrowClientCore():
 
         max_range_len = 100
         ranges = []
-        for reg_type in ["read", "hold"]:
-            # extract the registers by type because every range may only contain registers of either "hold" or "read" type.
-            regs = list(filter(lambda x: x.get("type") == reg_type, self.registers))
-            # Sort registers in ascending order by address.
-            regs = sorted(regs, key=lambda d: d['address'])
+        for slave_id in self.get_slave_ids():
+            # filter the list of registers by slave id:
+            registers_by_slave = list(filter(lambda x: x.get("slave", self.inverter_config['slave']) == slave_id, self.registers))
+            for reg_type in ["read", "hold"]:
+                # extract the registers by type because every range may only contain registers of either "hold" or "read" type.
+                regs = list(filter(lambda x: x.get("type") == reg_type, registers_by_slave))
+                # Sort registers in ascending order by address.
+                regs = sorted(regs, key=lambda d: d['address'])
 
-            range_start = 0
-            timenow = datetime.now()
-            for reg in regs:
-                # skip reg if it has an update frequency set and the last update
-                # has been within the configured update_frequency:
-                if reg.get("update_frequency") and reg.get("last_update"):
-                    logging.debug(f"Register {reg.get('name')} has update_frequency = {reg.get('update_frequency')} and last_update = {reg.get('last_update')}.")
-                    if (datetime.now() - reg["last_update"]).total_seconds() < reg.get("update_frequency"):
-                        logging.debug(f"Dropping register {reg.get('name')} from dynamically build scrape range due to update frequency.")
+                range_start = 0
+                timenow = datetime.now()
+                for reg in regs:
+                    # skip reg if it has an update frequency set and the last update
+                    # has been within the configured update_frequency:
+                    if reg.get("update_frequency") and reg.get("last_update"):
+                        logging.debug(f"Register {reg.get('name')} has update_frequency = {reg.get('update_frequency')} and last_update = {reg.get('last_update')}.")
+                        if (timenow - reg["last_update"]).total_seconds() < reg.get("update_frequency"):
+                            logging.debug(f"Dropping register {reg.get('name')} from dynamically build scrape range due to update frequency.")
+                            continue
+                    reg_addr =  reg.get("address")
+                    reg_len = self.register_length(reg)
+                    if (range_start == 0):
+                        range_start = reg_addr # start a new range
+                        range_end = reg_addr + reg_len - 1
                         continue
-                reg_addr =  reg.get("address")
-                reg_len = self.register_length(reg)
-                reg_datatype = reg.get("datatype")
-                if (range_start == 0):
+                    if reg_addr < range_start + max_range_len - (reg_len - 1):
+                        range_end = reg_addr + reg_len - 1
+                        continue
+                    # previous register did not fit in the current range anymore.
+                    # Emit current range and start a new one
+                    ranges.append({"start": range_start - 1, "range": range_end - range_start + 1, "type": reg_type, "slave": slave_id})
                     range_start = reg_addr # start a new range
                     range_end = reg_addr + reg_len - 1
-                    continue
-                if reg_addr < range_start + max_range_len - (reg_len - 1):
-                    range_end = reg_addr + reg_len - 1
-                    continue
-                # previous register did not fit in the current range anymore.
-                # Emit current range and start a new one
-                ranges.append({"start": range_start - 1, "range": range_end - range_start + 1, "type": reg_type})
-                range_start = reg_addr # start a new range
-                range_end = reg_addr + reg_len - 1
-            # loop finished, now complete the last open range, if one has been started:
-            if range_start > 0:
-                ranges.append({"start": range_start - 1, "range": range_end - range_start + 1, "type": reg_type})
+                # loop finished, now complete the last open range, if one has been started:
+                if range_start > 0:
+                    ranges.append({"start": range_start - 1, "range": range_end - range_start + 1, "type": reg_type, "slave": slave_id})
 
         logging.debug(f"Built address ranges for reading: {ranges}")
         return ranges
@@ -517,7 +531,7 @@ class SungrowClientCore():
 
 
     def scrape(self):
-        logging.info(f"Start reading ranges of data from inverter.")
+        logging.info("Start reading ranges of data from inverter.")
         scrape_start = datetime.now()
 
         self.init_latest_scrape()
@@ -541,6 +555,7 @@ class SungrowClientCore():
             logging.debug(f"Reading data {load_ranges_count} of {len(scraper_ranges)}, " \
                     + f"type ´{range.get('type')}`, range ´{range.get('start')}:{range.get('range')}`")
             if not self.load_registers(range.get('type'),
+                                       range.get("slave"),
                                        int(range.get('start')),
                                        int(range.get('range'))):
                 load_ranges_failed +=1
@@ -550,7 +565,7 @@ class SungrowClientCore():
             self.disconnect()
             return False
         if load_ranges_failed > 0:
-            logging.warning(f'Reading: Failed to read some ranges'
+            logging.warning('Reading: Failed to read some ranges'
                             + f"({load_ranges_failed} of {load_ranges_count})!")
 
         # Leave connection open, see if helps resolve the connection issues
@@ -559,10 +574,10 @@ class SungrowClientCore():
         self.do_field_post_processing()
 
         scrape_end = datetime.now()
-        logging.info(f'Finished reading ranges of data from inverter '
+        logging.info('Finished reading ranges of data from inverter '
                      + f"in {(scrape_end - scrape_start).seconds}."
-                     + f"{(scrape_end - scrape_start).microseconds}"
-                     + f"seconds.")
+                     + f"{(scrape_end - scrape_start).microseconds} "
+                     + "seconds.")
 
         return True
 
@@ -574,15 +589,15 @@ class SungrowClientCore():
 
 
     def print_register_list(self):
-        print("+---------------------------------------------------------------------------+")
-        print("| List of registers which are read from the inverter.                       |")
-        print("| The list is filtered according to the level and model support.            |")
-        print("+--------------------------------------------+-------+------+-------+-------+")
-        print("| {:<42} | {:^5} | {:<4} | {:<5} | {:<5} |".format('register name', 'unit', 'type', 'freq.', 'addr.'))
-        print("+--------------------------------------------+-------+------+-------+-------+")
+        print("+---------------------------------------------------------------------------------+")
+        print("| List of registers which are read from the inverter.                             |")
+        print("| The list is filtered according to the level and model support.                  |")
+        print("+--------------------------------------------+-------+------+-----+-------+-------+")
+        print("| {:<42} | {:^5} | {:<4} |{:^5}| {:<5} | {:<5} |".format('register name', 'unit', 'type', 'slave', 'freq.', 'addr.'))
+        print("+--------------------------------------------+-------+------+-----+-------+-------+")
         for reg in self.registers:
-            print("| {:<42} | {:^5} | {:<4} | {:<5} | {:<5} |".format(reg.get("name"), reg.get("unit",""), reg.get("type"), reg.get("update_frequency", ""), reg.get("address", "----")))
-        print("+--------------------------------------------+-------+------+-------+-------+")
+            print("| {:<42} | {:^5} | {:<4} | {:<3} | {:<5} | {:<5} |".format(reg.get("name"), reg.get("unit",""), reg.get("type"), reg.get("slave", ""), reg.get("update_frequency", ""), reg.get("address", "----")))
+        print("+--------------------------------------------+-------+------+-----+-------+-------+")
 
 
 class SungrowClient(SungrowClientCore):
@@ -652,7 +667,7 @@ class SungrowClient(SungrowClientCore):
                 )   
             except Exception:
                 self.latest_scrape["alarm_timestamp"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                logging.exception(f"Converting fields for alarm time into "
+                logging.exception("Converting fields for alarm time into "
                                   + "timestamp failed! Substituting values "
                                   + "from inverter by local timestamp.")
             finally:
@@ -702,7 +717,7 @@ class SungrowClient(SungrowClientCore):
                 else:
                     self.latest_scrape["run_state"] = "OFF"
             else:
-                logging.debug(f"Couldn't read start_stop so run_state is OFF")    
+                logging.debug("Couldn't read start_stop so run_state is OFF")    
                 self.latest_scrape["run_state"] = "OFF"
         except Exception:
             pass

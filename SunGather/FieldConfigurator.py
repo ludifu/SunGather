@@ -3,12 +3,11 @@
 import logging
 import yaml
 import re
+import sys
 
 
 class FieldConfigurator:
-
     def __init__(self, registers_filename, register_patch_config=None):
-
         # Filename of the yaml file to read register definitions from
         self.registers_filename = registers_filename
 
@@ -105,8 +104,8 @@ class FieldConfigurator:
         ] and not isinstance(attribute_value, int):
             logging.error(
                 f"Trying to patch {attribute_name} to value ´{attribute_value}` failed. "
-                + f"Attributes ´level`, ´address`, ´length`, ´undate_frequency` "
-                + f"must not be patched to anything but an Integer!"
+                + "Attributes ´level`, ´address`, ´length`, ´undate_frequency` "
+                + "must not be patched to anything but an Integer!"
             )
             return False
         elif attribute_name in [
@@ -116,13 +115,13 @@ class FieldConfigurator:
         ] and not isinstance(attribute_value, str):
             logging.error(
                 f"Trying to patch {attribute_name} to value ´{attribute_value}` failed. "
-                + f"Attributes ´unit`, ´datatype` must not be patched to anything but a String!"
+                + "Attributes ´unit`, ´datatype` must not be patched to anything but a String!"
             )
             return False
         elif attribute_name in ["accuracy"] and not isinstance(attribute_value, float):
             logging.error(
                 f"Trying to patch {attribute_name} to value ´{attribute_value}` failed. "
-                + f"Attribute ´accuracy` must not be patched to anything but a float!"
+                + "Attribute ´accuracy` must not be patched to anything but a float!"
             )
             return False
         return True
@@ -186,47 +185,49 @@ class FieldConfigurator:
 
     def print_register_list(self):
         print(
-            f"+-------------------------------------------------------------------------------+"
+            "+-------------------------------------------------------------------------------------+"
         )
         print(
-            f"| Register definitions after applying patches.                                  |"
+            "| Register definitions after applying patches.                                        |"
         )
         print(
-            f"| Note: The list is not (yet) filtered by supported models!                     |"
+            "| Note: The list is not (yet) filtered by supported models!                           |"
         )
         print(
-            f"+--------------------------------------------+-------+------+-------+-------+---+"
+            "+--------------------------------------------+-------+------+-------+-------+---+-----+"
         )
         print(
-            "| {:<42} | {:^5} | {:<4} | {:<5} | {:<5} |{:^3}|".format(
-                "register name", "unit", "type", "freq.", "addr", "lvl"
+                "| {:<42} | {:^5} | {:<4} | {:<5} | {:<5} |{:^3}|{:^5}|".format(
+                "register name", "unit", "type", "freq.", "addr", "lvl", "slave"
             )
         )
         print(
-            f"+--------------------------------------------+-------+------+-------+-------+---+"
+            "+--------------------------------------------+-------+------+-------+-------+---+-----+"
         )
         for reg in self.registers["registers"][0]["read"]:
             print(
-                "| {:<42} | {:^5} | {:<4} | {:>5} | {:>5} |{:^3}|".format(
+                    "| {:<42} | {:^5} | {:<4} | {:>5} | {:>5} |{:^3}| {:^3} |".format(
                     reg.get("name"),
                     reg.get("unit", ""),
                     "read",
                     reg.get("update_frequency", ""),
                     reg.get("address", "-----"),
                     reg.get("level", "-"),
+                    reg.get("slave", " "),
                 )
             )
         for reg in self.registers["registers"][1]["hold"]:
             print(
-                "| {:<42} | {:^5} | {:<4} | {:>5} | {:>5} |{:^3}|".format(
+                    "| {:<42} | {:^5} | {:<4} | {:>5} | {:>5} |{:^3}| {:^3} |".format(
                     reg.get("name"),
                     reg.get("unit", ""),
                     "hold",
                     reg.get("update_frequency", ""),
                     reg.get("address", "-----"),
                     reg.get("level", "-"),
+                    reg.get("slave", " "),
                 )
             )
         print(
-            f"+--------------------------------------------+-------+------+-------+-------+---+"
+            "+--------------------------------------------+-------+------+-------+-------+---+-----+"
         )

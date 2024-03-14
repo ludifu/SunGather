@@ -1,33 +1,16 @@
 #!/usr/bin/python3
 
 import logging
-import yaml
 
 from datetime import datetime
 from datetime import date
 
-"""
-    fm = FieldPostProcessor(config_filename="xf.yaml")
-    #fm = FieldPostProcessor(config=[{'field': 'load_doubled', 'expression': 'load_power_hybrid * 2'}])
-
-    fm.evaluate({'export_to_grid': 1000, 'meter_power': 100, 'total_active_power': 200, 'work_state_1': 'Run', 'start_stop': 'False', 'year': 2024, 'month': 2, 'day': 23, 'hour': 10, 'minute': 12, 'second': 44})
-    time.sleep(10)
-
-    fm.evaluate({'export_to_grid': 1000, 'meter_power': 100, 'total_active_power': 200, 'work_state_1': 'Run', 'start_stop': 'Fe'})
-    time.sleep(10)
-
-    fm.evaluate({'export_to_grid': 1000, 'meter_power': 100, 'total_active_power': 200})
-    time.sleep(10)
-"""
-
 
 class AbstractCode:
-
     # This class is the common ancestor for all classes representing
     # expressions and statements.  It should not be instantiated.
 
     def __init__(self, name, source, unit=None):
-
         # All kinds of AbstractCode objects have a name. The name is always
         # used as a field name.
         self.name = name
@@ -111,7 +94,6 @@ class AbstractCode:
 
 
 class FieldStatement(AbstractCode):
-
     # This class represents a block of arbitrary code - technically a statement
     # (in contrast to an expression). It is intended to store one or more custom
     # field values into the results, but the scope is not limited to this.
@@ -148,7 +130,6 @@ class FieldStatement(AbstractCode):
 
 
 class SimpleExpression(AbstractCode):
-
     def get_source_kind(self):
         return "eval"
 
@@ -164,7 +145,6 @@ class SimpleExpression(AbstractCode):
 
 
 class FieldExpression(SimpleExpression):
-
     # This class represents a python expression for calculating a named custom
     # field. The source is required to return a value. FieldExpression
     # instances use the name attribute to store the entries in the values
@@ -239,7 +219,6 @@ class FieldExpression(SimpleExpression):
 
 
 class AggregatingFieldExpression(FieldExpression):
-
     # This class will add the values calculated by its expression to a running
     # total. This can optionally be reset on a daily basis resulting in daily
     # aggregated values. If the running value is not reset, it results in an
@@ -321,7 +300,6 @@ class AggregatingFieldExpression(FieldExpression):
 
 
 class GuardExpression(SimpleExpression):
-
     # This class is an extension of SimpleExpression and will return False on
     # evaluation instead of None even if the execution fails, thereby providing
     # a fail safe behavior.
@@ -341,7 +319,6 @@ class GuardExpression(SimpleExpression):
 
 
 class CodeObjectFactory:
-
     # The responsibility of this class is to create an instance of a suitable
     # class for a custom field definition entry. It has only one class method.
     # Instantiation of this class is not required.
@@ -361,13 +338,13 @@ class CodeObjectFactory:
         unit = config.get("unit")
         ignore_msg = f"Ingnored config entry ´{config}`: "
         if name is None:
-            logging.error(ignore_msg + f"name is required.")
+            logging.error(ignore_msg + "name is required.")
             return None
         if stmt:
             if guard or wrtm or aggr or expr or flbk:
                 logging.error(
                     ignore_msg
-                    + f"guard, expression, aggregate, write_mode, fallback not allowed in combination with statement."
+                    + "guard, expression, aggregate, write_mode, fallback not allowed in combination with statement."
                 )
                 return None
             else:
@@ -379,12 +356,12 @@ class CodeObjectFactory:
         elif expr:
             if aggr and aggr not in ["daily", "total"]:
                 logging.error(
-                    ignore_msg + f"aggregation must be one of ´daily` or ´total`."
+                    ignore_msg + "aggregation must be one of ´daily` or ´total`."
                 )
                 return None
             if wrtm and wrtm not in ["replace_only", "new_only"]:
                 logging.error(
-                    ignore_msg + f" write_mode must be ´replace_only` or ´new_only`."
+                    ignore_msg + " write_mode must be ´replace_only` or ´new_only`."
                 )
                 return None
             if aggr:
@@ -407,12 +384,11 @@ class CodeObjectFactory:
                     unit=unit,
                 )
         else:
-            logging.error(ignore_msg + f"expression or statement required.")
+            logging.error(ignore_msg + "expression or statement required.")
             return None
 
 
 class FieldPostProcessor:
-
     def __init__(self, cf_definitions):
         self.expressions = []
         if cf_definitions is not None:
