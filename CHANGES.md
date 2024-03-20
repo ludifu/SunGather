@@ -3,9 +3,9 @@
 ## Version SunGatherEvo v1.0.0
 
 Initial release, forked off of SunGather version v0.5.1 from
-https://github.com/michbeck100/SunGather. Any changes after 2024-02-10 to
-either the original project by bohdans or michbeck100's fork are not included
-in this version.
+https://github.com/michbeck100/SunGather. Any changes after 2024-02-10 to the
+original project by bohdans or after 2023-10-04 to michbeck100's fork are not
+included in this version.
 
 In this fork the application was renamed to **SunGatherEvo** with its own
 independent version number. The first version working in my setup is thus
@@ -32,6 +32,8 @@ appropriate.
   Also the correct length of these attributes is used to avoid truncating text.
 The correct length of UTF-8 registers can be configured with the new `length`
 attribute.
+
+* Fixed an incompatibility caused by changes in Home Assistant.
 
 ### Improvements and Features
 
