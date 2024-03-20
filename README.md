@@ -12,7 +12,7 @@ SunGatherEvo is a fork of [Sungather](https://github.com/bohdan-s/SunGather) fro
 @bohdan-s, the creator of the original project.[^1]  Without his work my fork would
 not have been possible. I'm highly grateful for this.
 
-[^1] Actually SunGatherEvo was forked off of [another
+[^1]: Actually SunGatherEvo was forked off of [another
 fork](https://github.com/michbeck100/SunGather) by @michbeck100, because this
 already contained many valuable updates. michbeck100 also implemented a
 [monitoring stack](https://github.com/michbeck100/pv-monitoring) with InfluxDB
@@ -31,7 +31,7 @@ SunGatherEvo is based on version v0.5.3 (last original version from February
 2023) plus changes from michbeck100. It has its own version number, starting at
 `v1.0.0`.[^2] For a detailed list of changes see the [change log](CHANGES.md).
 
-[^2] As long as contributing into the original project is not possible there
+[^2]: As long as contributing into the original project is not possible there
 must be a way to keep track of development, i.e. a version number. Of course I
 cannot continue using the original version number as maintaining the original
 project's version is the author's exclusive right. Btw. creating my own
