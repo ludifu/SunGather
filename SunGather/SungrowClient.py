@@ -145,13 +145,13 @@ class SungrowClientCore():
                 self.registers.append(register)
                 break
         if reg_address is None:
-            logging.warning(f"Failed loading register ´{reg_name}` of type ´{reg_type}`, slave ´{slave}`. Register is not defined or address is missing in the register definition!")
+            logging.warning(f"Failed loading register ´{reg_name}` of type ´{reg_type}`, slave ´{self.inverter_config['slave']}`. Register is not defined or address is missing in the register definition!")
             return None
 
         success = self.load_registers(reg_type, self.inverter_config['slave'], reg_address -1, reg_len) # Needs to be address -1
         self.registers.pop()
         if not success:
-            logging.warning(f"Failed loading register ´{reg_name}` of type ´{reg_type}`, slave ´{slave}`!")
+            logging.warning(f"Failed loading register ´{reg_name}` of type ´{reg_type}`, slave ´{self.inverter_config['slave']}`!")
             return None
         return self.latest_scrape.get(reg_name)
 
