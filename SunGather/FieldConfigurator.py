@@ -44,6 +44,7 @@ class FieldConfigurator:
             )
             sys.exit(1)
 
+        # schema files are in a sub directory of this file:
         schema_dir = Path(os.path.abspath(os.path.dirname(__file__))) / "json_schema"
         schema_file_names = [
             "schema_scan_range.json",
@@ -68,6 +69,8 @@ class FieldConfigurator:
                 sys.exit(1)
 
         else:
+            # This does not mean the registers-sungrow.yaml file is wrong, it's
+            # just not validated. This requires a warning only.
             logging.warning(
                 "Loading of json schema files failed, registers file was not validated."
             )
@@ -75,7 +78,6 @@ class FieldConfigurator:
         # These checks are to allow empty lists of read and hold sections within
         # sections registers and scan. If these are empty in the yaml there will
         # not be an empty list. This is substituted here.
-
         if regs["registers"][0].get("read") is None:
             regs["registers"][0]["read"] = []
         if regs["registers"][1].get("hold") is None:
@@ -126,11 +128,9 @@ class FieldConfigurator:
             for error in errors:
                 if len(error.context) > 0:
                     for suberror in error.context:
-                        print(suberror.message)
-                        print(list(suberror.path))
+                        logging.error(f"Schema validation error: {suberror.message}. Error occurred in path: {list(suberror.path)}")
                 else:
-                    print(error.message)
-                    print(list(error.path))
+                        logging.error(f"Schema validation error: {error.message}. Error occurred in path: {list(error.path)}")
             return False
         else:
             return True
