@@ -4,15 +4,21 @@ import logging
 import yaml
 import re
 import sys
+from jsonschema import Draft202012Validator
+from referencing import Registry, Resource
+import json
+from json import JSONDecodeError
+from pathlib import Path
+import os
 
 
 class FieldConfigurator:
     def __init__(self, registers_filename, register_patch_config=None):
         # Filename of the yaml file to read register definitions from
-        self.registers_filename = registers_filename
+        self._registers_filename = registers_filename
 
         # part of the configuration containing register patches
-        self.patches = register_patch_config
+        self._patches = register_patch_config
 
         # The contents of the registers configuration file
         self.registers = None
@@ -21,25 +27,50 @@ class FieldConfigurator:
         # Return a fully configured lits of registers to read from the
         # inverter.  This includes reading the register definitions from a
         # configuration file, then applying the register patches.
-        self.load_registers()
-        self.patch_registers()
+        self._load_registers()
+        self._patch_registers()
         self.print_register_list()
         return self.registers
 
-    def load_registers(self):
+    def _load_registers(self):
         try:
-            regs = yaml.safe_load(open(self.registers_filename, encoding="utf-8"))
+            regs = yaml.safe_load(open(self._registers_filename, encoding="utf-8"))
             logging.info(
-                f"Loaded {self.registers_filename}, file version: {regs.get('version','UNKNOWN')}"
+                f"Loaded {self._registers_filename}, file version: {regs.get('version','UNKNOWN')}"
             )
         except Exception as err:
             logging.critical(
-                f"Failed loading registers from {self.registers_filename}: {err}"
+                f"Failed loading registers from {self._registers_filename}: {err}"
             )
             sys.exit(1)
 
-        # Full validation of the registers yaml syntax is rather scope of
-        # implementing a schema.
+        schema_dir = Path(os.path.abspath(os.path.dirname(__file__))) / "json_schema"
+        schema_file_names = [
+            "schema_scan_range.json",
+            "schema_register.json",
+            "schema_registers.json",
+        ]
+
+        registry = self._create_schema_registry(schema_dir, schema_file_names)
+
+        if registry is not None:
+            logging.info(
+                f"Performing schema validation of registers file ´{self._registers_filename}` ..."
+            )
+            if self._validate_registers(regs, registry):
+                logging.info(
+                    f"... registers file ´{self._registers_filename}` successfully validated."
+                )
+            else:
+                logging.critical(
+                    f"... Validation of registers file ´{self._registers_filename}` failed!"
+                )
+                sys.exit(1)
+
+        else:
+            logging.warning(
+                "Loading of json schema files failed, registers file was not validated."
+            )
 
         # These checks are to allow empty lists of read and hold sections within
         # sections registers and scan. If these are empty in the yaml there will
@@ -56,9 +87,57 @@ class FieldConfigurator:
 
         self.registers = regs
 
-    def patch_registers(self):
+    def _create_schema_registry(self, schema_file_path, schema_file_names):
+        # Create and return a json schema registry containing the schema and
+        # sub schemas for validating the registers.yaml filei provided in the
+        # schema_file_names parameter. In case of error reeturn None.
+
+        registry = Registry()
+        for fname in schema_file_names:
+            schema = None
+            try:
+                with open(Path(schema_file_path) / fname, "r") as f:
+                    try:
+                        schema = json.loads(f.read())
+                    except JSONDecodeError as de:
+                        logging.exception(
+                            f"Error decoding json schema file ´{fname}`: ", de
+                        )
+                        return None
+            except Exception as err:
+                logging.error(f"Error reading file ´{fname}`: ", err)
+                return None
+            res = Resource.from_contents(schema)
+            registry = res @ registry
+        return registry
+
+    def _validate_registers(self, loaded_yaml, schema_registry):
+        # Peform the schema validation of the registers-sungrow.yaml file. Log
+        # any errors, then return True if no errors occurred, False otherwise.
+
+        v = Draft202012Validator(
+            schema_registry.get_or_retrieve(
+                "urn:sungatherevo:registers"
+            ).value.contents,
+            registry=schema_registry,
+        )
+        errors = sorted(v.iter_errors(loaded_yaml), key=lambda e: e.path)
+        if len(errors) > 0:
+            for error in errors:
+                if len(error.context) > 0:
+                    for suberror in error.context:
+                        print(suberror.message)
+                        print(list(suberror.path))
+                else:
+                    print(error.message)
+                    print(list(error.path))
+            return False
+        else:
+            return True
+
+    def _patch_registers(self):
         # Update the register_configuration with modifications defined in the config file.
-        if self.patches is None:
+        if self._patches is None:
             # section register_patches does not exist or does not have entries.
             return
         logging.info("Applying patches to register definitions ...")
@@ -67,8 +146,8 @@ class FieldConfigurator:
             *self.registers["registers"][1]["hold"],
         ]
 
-        for patch in self.patches:
-            self.apply_single_patch(patch, allregs)
+        for patch in self._patches:
+            self._apply_single_patch(patch, allregs)
 
         for reg in allregs:
             # only new registers have a type (assuming that no one tries to change the type of an attribute ...)
@@ -78,7 +157,7 @@ class FieldConfigurator:
                 self.registers["registers"][1]["hold"].append(reg)
         logging.info("... finished applying patches to register definitions.")
 
-    def apply_single_patch(self, patch, allregs):
+    def _apply_single_patch(self, patch, allregs):
         # Apply one patch. A patch contains one or more attributes with
         # values to add or change in one or more registers.
         reg_name = patch.get("name")
@@ -91,9 +170,9 @@ class FieldConfigurator:
                 # it doesn't contain a value for patching.
                 continue
             attribute_value = patch.get(attribute_name)
-            self.patch_attribute(reg_name, attribute_name, attribute_value, allregs)
+            self._patch_attribute(reg_name, attribute_name, attribute_value, allregs)
 
-    def check_patch_value(self, attribute_name, attribute_value):
+    def _check_patch_value(self, attribute_name, attribute_value):
         # Check whether the type of attribute_value is allowed for
         # attribute_name and return True, otherwise return False.
         if attribute_name in [
@@ -126,9 +205,9 @@ class FieldConfigurator:
             return False
         return True
 
-    def patch_attribute(self, reg_name, attribute_name, attribute_value, allregs):
+    def _patch_attribute(self, reg_name, attribute_name, attribute_value, allregs):
         # Patch one attribute in all registers which match reg_name.
-        if not self.check_patch_value(attribute_name, attribute_value):
+        if not self._check_patch_value(attribute_name, attribute_value):
             return False
         try:
             p = re.compile(reg_name)
@@ -141,7 +220,7 @@ class FieldConfigurator:
         for reg in allregs:
             if p.fullmatch(reg.get("name")):
                 pattern_did_match = True
-                self.patch_register(reg, attribute_name, attribute_value)
+                self._patch_register(reg, attribute_name, attribute_value)
 
         # If there was no match for an existing register, then this entry is
         # intended to create a new register!
@@ -149,12 +228,12 @@ class FieldConfigurator:
             newreg = {}
             newreg["name"] = reg_name
             logging.debug(f"Adding new register ´{reg_name}`.")
-            self.patch_register(newreg, attribute_name, attribute_value)
+            self._patch_register(newreg, attribute_name, attribute_value)
             allregs.append(newreg)
             # This still needs to be added to the ´read` or ´hold` register lists later!
         return True
 
-    def patch_register(self, reg, attribute_name, attribute_value):
+    def _patch_register(self, reg, attribute_name, attribute_value):
         # Add or change one attribute (named attribute_name) to the value
         # attribute_value in one register (reg).
 
@@ -197,7 +276,7 @@ class FieldConfigurator:
             "+--------------------------------------------+-------+------+-------+-------+---+-----+"
         )
         print(
-                "| {:<42} | {:^5} | {:<4} | {:<5} | {:<5} |{:^3}|{:^5}|".format(
+            "| {:<42} | {:^5} | {:<4} | {:<5} | {:<5} |{:^3}|{:^5}|".format(
                 "register name", "unit", "type", "freq.", "addr", "lvl", "slave"
             )
         )
@@ -206,7 +285,7 @@ class FieldConfigurator:
         )
         for reg in self.registers["registers"][0]["read"]:
             print(
-                    "| {:<42} | {:^5} | {:<4} | {:>5} | {:>5} |{:^3}| {:^3} |".format(
+                "| {:<42} | {:^5} | {:<4} | {:>5} | {:>5} |{:^3}| {:^3} |".format(
                     reg.get("name"),
                     reg.get("unit", ""),
                     "read",
@@ -218,7 +297,7 @@ class FieldConfigurator:
             )
         for reg in self.registers["registers"][1]["hold"]:
             print(
-                    "| {:<42} | {:^5} | {:<4} | {:>5} | {:>5} |{:^3}| {:^3} |".format(
+                "| {:<42} | {:^5} | {:<4} | {:>5} | {:>5} |{:^3}| {:^3} |".format(
                     reg.get("name"),
                     reg.get("unit", ""),
                     "hold",
