@@ -1,8 +1,8 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "urn:sungatherevo:register",
-    "title": "Register",
-    "description": "A single register.",
+    "$id": "urn:sungatherevo:registerpatch",
+    "title": "Register patch",
+    "description": "A single register patch.",
     "type": "object",
     "properties": {
         "name": {
@@ -48,6 +48,14 @@
         "default": {
             "description": "a default value for datarange attributes, which have mo match."
         },
+        "change_name_to": {
+            "description": "In case an existing register should be renamed, this property contains the new name.",
+            "type": "string"
+        },
+        "type": {
+            "description": "The type of the register, either 'read' or 'hold'.",
+            "type": "string"
+        },
         "slave": {
             "description": "an optional slave id to be used when reading the register.",
             "type": "number"
@@ -83,9 +91,6 @@
     },
     "additionalProperties": false,
     "required": [
-        "name",
-        "address",
-        "level",
-        "datatype"
+        "name"
     ]
 }

@@ -4,12 +4,7 @@ import logging
 import yaml
 import re
 import sys
-from jsonschema import Draft202012Validator
-from referencing import Registry, Resource
-import json
-from json import JSONDecodeError
-from pathlib import Path
-import os
+from JSONSchemaValidator import JSONSchemaValidator
 
 
 class FieldConfigurator:
@@ -44,36 +39,20 @@ class FieldConfigurator:
             )
             sys.exit(1)
 
-        # schema files are in a sub directory of this file:
-        schema_dir = Path(os.path.abspath(os.path.dirname(__file__))) / "json_schema"
-        schema_file_names = [
-            "schema_scan_range.json",
-            "schema_register.json",
-            "schema_registers.json",
-        ]
 
-        registry = self._create_schema_registry(schema_dir, schema_file_names)
-
-        if registry is not None:
+        v = JSONSchemaValidator()
+        logging.info(
+            f"Performing schema validation of registers file ´{self._registers_filename}` ..."
+        )
+        if v.validate_registers_file(regs):
             logging.info(
-                f"Performing schema validation of registers file ´{self._registers_filename}` ..."
+                f"... registers file ´{self._registers_filename}` successfully validated."
             )
-            if self._validate_registers(regs, registry):
-                logging.info(
-                    f"... registers file ´{self._registers_filename}` successfully validated."
-                )
-            else:
-                logging.critical(
-                    f"... Validation of registers file ´{self._registers_filename}` failed!"
-                )
-                sys.exit(1)
-
         else:
-            # This does not mean the registers-sungrow.yaml file is wrong, it's
-            # just not validated. This requires a warning only.
-            logging.warning(
-                "Loading of json schema files failed, registers file was not validated."
+            logging.critical(
+                f"... Validation of registers file ´{self._registers_filename}` failed!"
             )
+            sys.exit(1)
 
         # These checks are to allow empty lists of read and hold sections within
         # sections registers and scan. If these are empty in the yaml there will
@@ -88,52 +67,6 @@ class FieldConfigurator:
             regs["scan"][1]["hold"] = []
 
         self.registers = regs
-
-    def _create_schema_registry(self, schema_file_path, schema_file_names):
-        # Create and return a json schema registry containing the schema and
-        # sub schemas for validating the registers.yaml filei provided in the
-        # schema_file_names parameter. In case of error reeturn None.
-
-        registry = Registry()
-        for fname in schema_file_names:
-            schema = None
-            try:
-                with open(Path(schema_file_path) / fname, "r") as f:
-                    try:
-                        schema = json.loads(f.read())
-                    except JSONDecodeError as de:
-                        logging.exception(
-                            f"Error decoding json schema file ´{fname}`: ", de
-                        )
-                        return None
-            except Exception as err:
-                logging.error(f"Error reading file ´{fname}`: ", err)
-                return None
-            res = Resource.from_contents(schema)
-            registry = res @ registry
-        return registry
-
-    def _validate_registers(self, loaded_yaml, schema_registry):
-        # Peform the schema validation of the registers-sungrow.yaml file. Log
-        # any errors, then return True if no errors occurred, False otherwise.
-
-        v = Draft202012Validator(
-            schema_registry.get_or_retrieve(
-                "urn:sungatherevo:registers"
-            ).value.contents,
-            registry=schema_registry,
-        )
-        errors = sorted(v.iter_errors(loaded_yaml), key=lambda e: e.path)
-        if len(errors) > 0:
-            for error in errors:
-                if len(error.context) > 0:
-                    for suberror in error.context:
-                        logging.error(f"Schema validation error: {suberror.message}. Error occurred in path: {list(suberror.path)}")
-                else:
-                        logging.error(f"Schema validation error: {error.message}. Error occurred in path: {list(error.path)}")
-            return False
-        else:
-            return True
 
     def _patch_registers(self):
         # Update the register_configuration with modifications defined in the config file.

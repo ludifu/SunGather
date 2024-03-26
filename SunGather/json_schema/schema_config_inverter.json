@@ -1,0 +1,73 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "urn:sungatherevo:config_inverter",
+    "title": "SunGatherEvo inverter configuration",
+    "description": "The section describing the configuration for addressing the inverter.",
+    "type": "object",
+    "properties": {
+        "host": {
+            "type": "string",
+            "format": "hostname"
+        },
+        "port": {
+            "type": "integer"
+        },
+        "connection": {
+            "type": "string",
+            "format": {
+                "enum": [
+                    "sungrow",
+                    "http",
+                    "modbus"
+                ]
+            }
+        },
+        "slave": {
+            "type": "integer"
+        },
+        "timeout": {
+            "type": "integer"
+        },
+        "retries": {
+            "type": "integer"
+        },
+        "scan_interval": {
+            "type": "integer"
+        },
+        "model": {
+            "type": "string"
+        },
+        "serial": {
+            "type": "string"
+        },
+        "smart_meter": {
+            "type": "boolean"
+        },
+        "use_local_time": {
+            "type": "boolean"
+        },
+        "log_console": {
+            "type": "string"
+        },
+        "log_file": {
+            "type": "string"
+        },
+        "level": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4
+        },
+        "dyna_scan": {
+            "type": "boolean"
+        },
+        "disable_custom_registers": {
+            "type": "boolean"
+        },
+        "register_patches": {
+            "$ref": "urn:sungatherevo:config_inverter_registerpatches"
+        },
+        "customfields": {
+            "$ref": "urn:sungatherevo:config_inverter_customfields"
+        }
+    }
+}

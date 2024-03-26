@@ -336,7 +336,7 @@ class CodeObjectFactory:
         wrtm = config.get("write_mode")
         flbk = config.get("fallback")
         unit = config.get("unit")
-        ignore_msg = f"Ingnored config entry ´{config}`: "
+        ignore_msg = f"Ignored config entry ´{config}`: "
         if name is None:
             logging.error(ignore_msg + "name is required.")
             return None

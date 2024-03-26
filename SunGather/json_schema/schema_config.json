@@ -1,0 +1,19 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "urn:sungatherevo:config",
+    "title": "SunGatherEvo configuration",
+    "description": "The main configuration file for SunGatherEvo.",
+    "type": "object",
+    "properties": {
+        "inverter": {
+            "$ref": "urn:sungatherevo:config_inverter"
+        },
+        "exports": {
+            "$ref": "urn:sungatherevo:config_exports"
+        }
+    },
+    "required": [
+        "inverter",
+        "exports"
+    ]
+}
