@@ -4,7 +4,8 @@
 
 ### Improvements
 
-* Added schema validation for the `registers-sungrow.yaml` file.
+* Added schema validation for the `registers-sungrow.yaml` and the
+  `config.yaml` files.
 
 
 ## Version SunGatherEvo v1.0.0

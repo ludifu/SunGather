@@ -15,5 +15,6 @@
     "required": [
         "inverter",
         "exports"
-    ]
+    ],
+    "additionalProperties": false
 }
