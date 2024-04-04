@@ -1,0 +1,18 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "urn:sungatherevo:config_export",
+    "title": "SunGatherEvo export configuration",
+    "description": "The section describes the configuration of one export.",
+    "type": "object",
+    "properties": {
+        "name": {
+            "type": "string"
+        },
+        "enabled": {
+            "type": "boolean"
+        }
+    },
+    "required": [
+        "name"
+    ]
+}

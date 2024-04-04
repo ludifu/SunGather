@@ -1,0 +1,65 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "urn:sungatherevo:customfield",
+    "title": "SunGatherEvo definition of a single custom field",
+    "description": "The section describes one single custom field definitions entry. This can either be a statement with a name or an expression with a name. Other properties are optional.",
+    "type": "object",
+    "oneOf": [
+        {
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "statement": {
+                    "type": "string"
+                },
+                "unit": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "name",
+                "statement"
+            ],
+            "additionalProperties": false
+        },
+        {
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "expression": {
+                    "type": "string"
+                },
+                "fallback": {
+                    "type": "string"
+                },
+                "guard": {
+                    "type": "string"
+                },
+                "unit": {
+                    "type": "string"
+                },
+                "write_mode": {
+                    "type": "string",
+                    "enum": [
+                        "replace_only",
+                        "new_only"
+                    ]
+                },
+                "aggregate": {
+                    "type": "string",
+                    "enum": [
+                        "daily",
+                        "total"
+                    ]
+                }
+            },
+            "required": [
+                "name",
+                "expression"
+            ],
+            "additionalProperties": false
+        }
+    ]
+}

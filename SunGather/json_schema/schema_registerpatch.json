@@ -1,0 +1,96 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "urn:sungatherevo:registerpatch",
+    "title": "Register patch",
+    "description": "A single register patch.",
+    "type": "object",
+    "properties": {
+        "name": {
+            "description": "the register's name which is exposed to exports.",
+            "type": "string"
+        },
+        "address": {
+            "description": "the register's address when reading from the inverter.",
+            "type": "number"
+        },
+        "level": {
+            "description": "the register will be read if this level is less or equal to the level configured to be read.",
+            "type": "number"
+        },
+        "datatype": {
+            "description": "the datatype can be S16, U16, S32, U32 or UTF-8.",
+            "type": "string"
+        },
+        "length": {
+            "description": "if the datatype is uTF-8 the length in characters should be provided.",
+            "type": "number"
+        },
+        "update_frequency": {
+            "description": "with an update frequency explicitly specified, the register can be read less frequently.",
+            "type": "number"
+        },
+        "smart_meter": {
+            "description": "if true, then the register is available independently from the inverter model, if a smart meter is installed.",
+            "type": "boolean"
+        },
+        "unit": {
+            "description": "the register's unit to be used by exports, like '%', 'W', 'kWh', etc.",
+            "type": "string"
+        },
+        "accuracy": {
+            "description": "if this property is provided, then a numeric register will be multiplied by this value after reading.",
+            "type": "number"
+        },
+        "mask": {
+            "description": "a bit mask to filter the returned value",
+            "type": "integer"
+        },
+        "default": {
+            "description": "a default value for datarange attributes, which have mo match."
+        },
+        "change_name_to": {
+            "description": "In case an existing register should be renamed, this property contains the new name.",
+            "type": "string"
+        },
+        "type": {
+            "description": "The type of the register, either 'read' or 'hold'.",
+            "type": "string"
+        },
+        "slave": {
+            "description": "an optional slave id to be used when reading the register.",
+            "type": "number"
+        },
+        "models": {
+            "description": "the list of inverter models that can deliver this register.",
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "minitems": 1
+        },
+        "datarange": {
+            "description": "a mapping of values delivered by an inverter to values delivered by the program, for example to map a numeric device type code to a model name.",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "response": {
+                        "type": "number"
+                    },
+                    "value": {}
+                },
+                "additionalProperties": false,
+                "required": [
+                    "response",
+                    "value"
+                ]
+            },
+            "minitems": 1,
+            "uniqueitems": true
+        }
+    },
+    "additionalProperties": false,
+    "required": [
+        "name"
+    ]
+}

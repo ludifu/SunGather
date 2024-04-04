@@ -1,0 +1,93 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "urn:sungatherevo:registers",
+    "title": "registers",
+    "description": "a list of registers available in any Sungrow inverter.",
+    "type": "object",
+    "properties": {
+        "version": {
+            "description": "the version of this file",
+            "type": "string"
+        },
+        "vendor": {
+            "description": "the vendor of inverter models for which this file contains register definitions. Optional and not evaluated.",
+            "type": "string"
+        },
+        "registers": {
+            "description": "the list of registers split into registers of type 'read' and 'hold'.",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "oneof": [
+                    {
+                        "properties": {
+                            "read": {
+                                "description": "The list of read registers.",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "urn:sungatherevo:register"
+                                }
+                            }
+                        },
+                        "required": [
+                            "read"
+                        ]
+                    },
+                    {
+                        "properties": {
+                            "hold": {
+                                "description": "The list of hold registers.",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "urn:sungatherevo:register"
+                                }
+                            }
+                        },
+                        "required": [
+                            "hold"
+                        ]
+                    }
+                ]
+            }
+        },
+        "scan": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "oneof": [
+                    {
+                        "properties": {
+                            "read": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "urn:sungatherevo:scan_range"
+                                }
+                            }
+                        },
+                        "required": [
+                            "read"
+                        ]
+                    },
+                    {
+                        "properties": {
+                            "hold": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "urn:sungatherevo:scan_range"
+                                }
+                            }
+                        },
+                        "required": [
+                            "hold"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "required": [
+        "version",
+        "registers",
+        "scan"
+    ]
+}

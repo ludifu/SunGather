@@ -1,0 +1,22 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "urn:sungatherevo:scan_range",
+    "title": "scan range",
+    "description": "an address area containing any number of registers to be read from an inverter.",
+    "type": "object",
+    "properties": {
+        "start": {
+            "description": "the start address of an address range to be read.",
+            "type": "number"
+        },
+        "range": {
+            "description": "the length of an address range to be read.",
+            "type": "number"
+        }
+    },
+    "additionalProperties": false,
+    "required": [
+        "start",
+        "range"
+    ]
+}

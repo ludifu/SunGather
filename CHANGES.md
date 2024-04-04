@@ -1,5 +1,13 @@
 # Change log
 
+## Version SunGatherEvo (tbd)
+
+### Improvements
+
+* Added schema validation for the `registers-sungrow.yaml` and the
+  `config.yaml` files.
+
+
 ## Version SunGatherEvo v1.0.0
 
 Initial release, forked off of SunGather version v0.5.1 from

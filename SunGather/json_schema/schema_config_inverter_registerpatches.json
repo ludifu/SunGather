@@ -1,0 +1,10 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "urn:sungatherevo:config_inverter_registerpatches",
+    "title": "SunGatherEvo register patches configuration",
+    "description": "The section describes the register patches within the inverter section of the SunGatherEvo master config file.",
+    "type": "array",
+    "items": {
+        "$ref": "urn:sungatherevo:registerpatch"
+    }
+}

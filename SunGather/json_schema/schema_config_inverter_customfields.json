@@ -1,0 +1,10 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "urn:sungatherevo:config_inverter_customfields",
+    "title": "SunGatherEvo custom field definitions",
+    "description": "The section describes the custom field definitions within the inverter section of the SunGatherEvo master config file.",
+    "type": "array",
+    "items": {
+        "$ref": "urn:sungatherevo:customfield"
+    }
+}
