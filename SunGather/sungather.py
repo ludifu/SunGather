@@ -3,6 +3,7 @@
 from SungrowClient import SungrowClient
 from SungrowClient import SungrowClientCore
 from FieldConfigurator import FieldConfigurator
+from JSONSchemaValidator import JSONSchemaValidator
 from version import __version__
 
 import importlib
@@ -16,24 +17,20 @@ import time
 
 def main():
     app_args = read_arguments_from_commandline()
+    # Use log level from command line if specified:
+    setup_console_logging(app_args["loglevel"])
+
     app_config = load_config_file(app_args["configfilename"])
     inverter_config = get_inverter_config(app_config)
-    setup_log_levels_and_log_file(
-        app_args["loglevel"],
-        app_args["logfolder"],
-        inverter_config["log_file"],
-        inverter_config["log_console"],
-    )
+
+    if app_args["loglevel"] is None:
+        # fall back to log level from config file
+        setup_console_logging(inverter_config["log_console"])
+    setup_file_logging(app_args["logfolder"], inverter_config["log_file"])
 
     print_welcome_message(app_args, inverter_config)
 
-    check_config(app_config, inverter_config)
-
-    patches = app_config["inverter"].get("register_patches", None)
-    fc = FieldConfigurator(app_args["registersfilename"], register_patch_config=patches)
-    register_config = fc.get_register_config()
-
-    inverter = setup_inverter(inverter_config, register_config)
+    inverter = setup_inverter(inverter_config, app_args["registersfilename"])
 
     exports = setup_exports(app_config, inverter)
 
@@ -119,8 +116,13 @@ def load_config_file(configfilename):
     except Exception as err:
         logging.exception(f"Failed loading config: {configfilename} \n\t\t\t     {err}")
         sys.exit(1)
-    if not configfile.get("inverter"):
-        logging.critical("Failed loading config, missing Inverter settings")
+
+    v = JSONSchemaValidator()
+    logging.debug(f"Performing schema validation of config file ´{configfilename}` ...")
+    if v.validate_config_file(configfile):
+        logging.debug(f"... config file ´{configfilename}` successfully validated.")
+    else:
+        logging.critical(f"... Validation of config file ´{configfilename}` failed!")
         sys.exit(1)
 
     return configfile
@@ -159,27 +161,11 @@ def print_welcome_message(app_args, inverter_configuration):
     logging.info("##################################################################")
 
 
-def check_config(app_config, inverter_config):
-    if inverter_config["log_file"] not in [
-        "OFF",
-        "DEBUG",
-        "INFO",
-        "WARNING",
-        "ERROR",
-    ]:
-        logging.warning(
-            "log_file: Valid options are: DEBUG, INFO, WARNING, ERROR and OFF"
-        )
+def setup_inverter(inverter_config, register_config_filename):
+    patches = inverter_config.get("register_patches", None)
+    fc = FieldConfigurator(register_config_filename, register_patch_config=patches)
+    register_configuration = fc.get_register_config()
 
-    if inverter_config["connection"] not in ["http", "sungrow", "modbus"]:
-        logging.critical(
-            f"Unknown connection type ´{inverter_config['connection']}`, "
-            + "Valid options are ´http`, ´sungrow` or ´modbus`!"
-        )
-        sys.exit(1)
-
-
-def setup_inverter(inverter_config, register_configuration):
     if inverter_config.get("disable_legacy_custom_registers"):
         inverter = SungrowClientCore(inverter_config)
     else:
@@ -190,7 +176,6 @@ def setup_inverter(inverter_config, register_configuration):
     # established!  A return value of False indicates an exception occured
     # during an attempted connect in the library code.  This is sufficient
     # reason for sys.exit().
-
     if not inverter.connect():
         logging.critical(
             f"Connection to inverter failed: {inverter_config.get('host')}:{inverter_config.get('port')}"
@@ -199,9 +184,7 @@ def setup_inverter(inverter_config, register_configuration):
 
     inverter.configure_registers(register_configuration)
     inverter.close()
-
     inverter.print_register_list()
-
     return inverter
 
 
@@ -305,31 +288,17 @@ def scrape_and_export_once(inverter, exports):
         logging.warning("Data collection failed, skipped exporting data.")
 
 
-#######################################################################
-# Functions for setup of logging
-
-
-def setup_log_levels_and_log_file(loglevel, logfolder, lvl_file, lvl_console):
-    # Setup logging targets.levels, etc.  Note that ´log_file` does not point
-    # to a file but contains the log level for a log file. Same with
-    # ´log_console`.
-
+def setup_console_logging(loglevel):
     # Get a reference to the root logger:
     logger = logging.getLogger()
-
-    # console logging
     if loglevel is not None:
-        # loglevel was provided as a commandline argument
         logger.handlers[0].setLevel(loglevel)
-    else:
-        # use log level provided in config file
-        logger.handlers[0].setLevel(lvl_console)
-    logging.debug(
-        f"Logging to console with level {logging.getLevelName(logger.handlers[0].level)}"
-    )
 
-    # file logging
-    if not lvl_file == "OFF":
+
+def setup_file_logging(logfolder, loglevel):
+    # Get a reference to the root logger:
+    logger = logging.getLogger()
+    if not loglevel == "OFF":
         logfile = logfolder + "SunGather.log"
         try:
             fh = logging.handlers.RotatingFileHandler(
@@ -337,19 +306,14 @@ def setup_log_levels_and_log_file(loglevel, logfolder, lvl_file, lvl_console):
             )  # Log 10mb files, 10 x files = 100mb
         except IOError as ioe:
             logging.error(
-                "Error setting up log file. "
-                + "Logging to file could not be enabled. "
-                + f"The original error was: {ioe}"
+                f"Error setting up log file. Logging to file could not be enabled. The original error was: {ioe}"
             )
         else:
             fh.formatter = logger.handlers[0].formatter
-            fh.setLevel(lvl_file)
+            fh.setLevel(loglevel)
             logger.addHandler(fh)
-            logging.debug(f"Logging to file with level {lvl_file}")
+            logging.debug(f"Logging to file with level {loglevel}")
 
-
-#######################################################################
-# main ...
 
 logging.basicConfig(
     # Format log messages as for example ´2024-02-11 05:57:40 INFO     Loaded config: config.yaml`

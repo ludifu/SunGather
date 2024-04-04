@@ -14,13 +14,11 @@
         },
         "connection": {
             "type": "string",
-            "format": {
-                "enum": [
-                    "sungrow",
-                    "http",
-                    "modbus"
-                ]
-            }
+            "enum": [
+                "sungrow",
+                "http",
+                "modbus"
+            ]
         },
         "slave": {
             "type": "integer"
@@ -50,7 +48,14 @@
             "type": "string"
         },
         "log_file": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+                "OFF",
+                "DEBUG",
+                "WARNING",
+                "INFO",
+                "ERROR"
+            ]
         },
         "level": {
             "type": "integer",
