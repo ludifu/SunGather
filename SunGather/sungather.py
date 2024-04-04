@@ -149,6 +149,7 @@ def get_inverter_config(app_configuration):
             "disable_legacy_custom_registers", False
         ),
         "customfields": app_configuration["inverter"].get("customfields", []),
+        "register_patches": app_configuration["inverter"].get("register_patches", []),
     }
     return config_inverter
 
