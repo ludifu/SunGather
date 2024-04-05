@@ -1,0 +1,18 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "urn:sungatherevo:config_import",
+    "title": "SunGatherEvo import configuration",
+    "description": "The section describes the configuration of one import.",
+    "type": "object",
+    "properties": {
+        "name": {
+            "type": "string"
+        },
+        "enabled": {
+            "type": "boolean"
+        }
+    },
+    "required": [
+        "name"
+    ]
+}

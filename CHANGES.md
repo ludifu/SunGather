@@ -1,6 +1,14 @@
 # Change log
 
-## Version SunGatherEvo (1.2)
+
+## Version SunGatherEvo  v1.3
+
+### Improvements
+
+* SunGatherEvo can now write holding registers. It will establish an HTTP
+  server and list to post requests.
+
+## Version SunGatherEvo v1.2
 
 ### Improvements
 
@@ -11,7 +19,7 @@ inverter models as well as more added registers. The file has its own version
 v2.0.0
 
 
-## Version SunGatherEvo (1.1)
+## Version SunGatherEvo v1.1
 
 ### Improvements
 

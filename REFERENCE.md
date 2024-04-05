@@ -290,6 +290,39 @@ Statements can also store arbitrary values into a dictionary `previous_results`
 which will be available the next time this statement is evaluated. Values in
 this dictionary do not become part of the result.
 
+
+## Section imports
+
+Imports are used to modify the inverter configuration.
+
+This section contains one import `http` which can be enabled. This import
+allows sending HTTP POST requests to SunGatherEvo. The request body must
+contain a json representation of a dictionary with key value pairs of register
+names and values.
+
+The register names must be in the list of holding registers which SunGatherEvo
+is configured to read from the inverter after evaluating the
+`registers-sungrow.yaml` file, applying any register patches and filtering for
+model compatibility and level.
+
+An example POST call via `curl` made from `localhost` to set the `soc-reserve`
+register to 14:
+
+```
+curl -s -X POST 'http://0.0.0.0:8888/registers' --data '{ "soc_reserve" : 14 }' | jq
+```
+
+This call assumes the port is configured to 8888. The call will return a json structure
+indicating the effective addresses and values written to the inverter. (Piping
+to `jq` can be omitted, this is not part of the call, just for visualization of the result.)
+
+> [!CAUTION]
+> Enabling the web server is a significant security risk! There is no
+> authentication / authorization. Before enabling this server make sure you
+> understand the security risks this imposes!
+
+
+
 ## Section exports
 
 This section is completely unchanged form the original project (as are the

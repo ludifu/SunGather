@@ -1,0 +1,10 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "urn:sungatherevo:config_imports",
+    "title": "SunGatherEvo imports configuration",
+    "description": "The section describes the configuration of different kinds of imports for changing hold registers.",
+    "type": "array",
+    "items": {
+        "$ref": "urn:sungatherevo:config_import"
+    }
+}

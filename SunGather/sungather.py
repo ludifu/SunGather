@@ -5,6 +5,7 @@ from SungrowClient import SungrowClientCore
 from FieldConfigurator import FieldConfigurator
 from JSONSchemaValidator import JSONSchemaValidator
 from version import __version__
+from RegisterWriter import RegisterWriter
 
 import importlib
 import logging
@@ -33,6 +34,13 @@ def main():
     inverter = setup_inverter(inverter_config, app_args["registersfilename"])
 
     exports = setup_exports(app_config, inverter)
+
+    import_config = app_config.get("imports")
+    if import_config is not None:
+        for imp in import_config:
+            if imp.get("name") == "http" and imp.get("enabled"):
+                r = RegisterWriter()
+                r.setup(inverter, port=8888)
 
     core_loop(
         inverter,

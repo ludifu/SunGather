@@ -10,6 +10,9 @@
         },
         "exports": {
             "$ref": "urn:sungatherevo:config_exports"
+        },
+        "imports": {
+            "$ref": "urn:sungatherevo:config_imports"
         }
     },
     "required": [
