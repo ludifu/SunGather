@@ -1,6 +1,17 @@
 # Change log
 
-## Version SunGatherEvo (tbd)
+## Version SunGatherEvo (1.2)
+
+### Improvements
+
+* Updated registers-sungrow.yaml file to Sungrow specifications **Communication
+  Protocol of PV Grid-Connected String Inverters V1.1.46** and **Communication
+Protocol of Residential Hybrid Inverter V1.1.2**. This includes many added
+inverter models as well as more added registers. The file has its own version
+v2.0.0
+
+
+## Version SunGatherEvo (1.1)
 
 ### Improvements
 
