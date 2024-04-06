@@ -8,6 +8,7 @@ from FieldPostProcessor import FieldPostProcessor
 
 from datetime import datetime
 
+from threading import BoundedSemaphore
 import logging
 import logging.handlers
 import time
@@ -47,6 +48,7 @@ class SungrowClientCore():
         fpp = FieldPostProcessor(config_inverter.get("customfields", None))
         self.field_post_processor = fpp 
 
+        self.sem = BoundedSemaphore()
 
 
     def connect(self):
@@ -534,6 +536,25 @@ class SungrowClientCore():
         logging.info("Start reading ranges of data from inverter.")
         scrape_start = datetime.now()
 
+        # Protect the reading as a whole to avoid concurrent updates to
+        # holding registers. This would possibly result in inconsistent readings
+        # if updates happen between two readings of registers.
+        try:
+            self.sem.acquire()
+            result = self._scrape_concurrency_guarded()
+        finally:
+            self.sem.release()
+
+        scrape_end = datetime.now()
+        logging.info('Finished reading ranges of data from inverter '
+                     + f"in {(scrape_end - scrape_start).seconds}."
+                     + f"{(scrape_end - scrape_start).microseconds} "
+                     + "seconds.")
+
+        return result
+
+
+    def _scrape_concurrency_guarded(self):
         self.init_latest_scrape()
 
         # Note that using the value from the inverter config means that if the
@@ -572,12 +593,6 @@ class SungrowClientCore():
         #self.close()
 
         self.do_field_post_processing()
-
-        scrape_end = datetime.now()
-        logging.info('Finished reading ranges of data from inverter '
-                     + f"in {(scrape_end - scrape_start).seconds}."
-                     + f"{(scrape_end - scrape_start).microseconds} "
-                     + "seconds.")
 
         return True
 

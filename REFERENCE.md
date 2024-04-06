@@ -293,7 +293,8 @@ this dictionary do not become part of the result.
 
 ## Section imports
 
-Imports are used to modify the inverter configuration.
+Imports are used to modify the inverter configuration by writing values to
+holding registers.
 
 This section contains one import `http` which can be enabled. This import
 allows sending HTTP POST requests to SunGatherEvo. The request body must
@@ -306,22 +307,68 @@ is configured to read from the inverter after evaluating the
 model compatibility and level.
 
 An example POST call via `curl` made from `localhost` to set the `soc-reserve`
-register to 14:
+register to 14%:
 
 ```
 curl -s -X POST 'http://0.0.0.0:8888/registers' --data '{ "soc_reserve" : 14 }' | jq
 ```
 
-This call assumes the port is configured to 8888. The call will return a json structure
-indicating the effective addresses and values written to the inverter. (Piping
-to `jq` can be omitted, this is not part of the call, just for visualization of the result.)
+This call assumes the port is configured to 8888. The call will return a json
+structure indicating the effective addresses and values written to the
+inverter. (Piping to `jq` can be omitted, this is not part of the call, just
+for visualization of the result.)
 
 > [!CAUTION]
 > Enabling the web server is a significant security risk! There is no
 > authentication / authorization. Before enabling this server make sure you
 > understand the security risks this imposes!
 
+Securing the server should involve infrastructure changes like a firewall and
+areverse proxy setup with a full blown HTTP server like Apache or nginx. Adding
+the required level of security is not in scope of this implementation. 
 
+> [!NOTE]
+> Why provide another way to manipulate holding registers as part of a
+> monitoring tool? There are many ways to configure a Sungrow inverter which
+> are suitable for the most users. Some solutions are discussion below
+> providing their respective strengths and weaknesses.
+
+Sungrow provides a smartphone app and the integrated Webserver of the
+WiNet-Dongles mainly for initial setup. These are limited to local access and
+do not provide access to all parameters at least for the end user.
+
+The **iSolarCloud application** may be the easiest solution: It allows remote
+changes and it is at least intended to be end user friendly. Full access to
+most settings is possible although it requires a separate installer account as
+a workaround. One huge downside is that it forces a user to give full network
+access to the inverter and let Sungrow and who else access the installation as
+well. Sungrow has in the past provided firmware updates without asking and even
+prior announcement and users experienced broken functionalities of their
+installations afterwards. Not every owner of an inverter may want to accept
+this risk.
+
+Another possibility is a **Home Assistant** installation with automations. This is
+quite easy to use once the required automations have been created. It can be
+made available for remote operation without delegating any security to third
+party cloud applications. Depending on the Sungrow integration it may be quite
+limited in terms of available registers for monitoring or configuring. And for
+users not interested home automation it is probably too big of a tool.
+
+Finally for the tech savvy the most obvious solution is using a command line
+tool like `mbpoll` to directly communicate with an inverter. This requires
+solid understanding of Unix shells iand the m,odbus protocol. Secure remote
+operation requires the skills of an experienced network engineer. Also is
+requires detailed knowledge of the Sungrow specifications, the register
+addresses and the value mappings for specific registers.
+
+SunGathereEvo fills a rather small gap: Without solid understanding of how to
+secure it for remote operation it is limited to local operation and in its
+current state it requires using a shell as well. However it has advantages over
+using `mbpoll`: Manipulating registers abstracts from the addresses and can be
+done using the register names know from SunGatherEvo. Also target values are
+provided in the same format as delivered as output of SunGatherEvo: If
+SunGatherevo reports a feature as "Enabled" or "Disabled" it can be changed
+using these values as well - instead of providing values like 0x55 or 0xAA.
 
 ## Section exports
 
