@@ -228,7 +228,11 @@ class WebRequestHandler(BaseHTTPRequestHandler):
                 self.send_header("Content-Type", "application/json")
                 self.end_headers()
                 rw = RegisterWriter()
-                regs = [reg["name"] for reg in rw._sungrow_client.get_my_register_list()]
+                regs = [
+                    reg["name"]
+                    for reg in rw._sungrow_client.get_my_register_list()
+                    if (reg.get("type") == "hold" and reg.get("address") is not None)
+                ]
                 self.wfile.write(json.dumps(regs).encode("utf-8"))
             except Exception as err:
                 # Not clear what went wrong if we end up here, so report a server
@@ -237,7 +241,6 @@ class WebRequestHandler(BaseHTTPRequestHandler):
                 self.send_response(500)
                 self.end_headers()
                 return
-
 
     def do_POST(self):
         if self.url.path != "/registers":
