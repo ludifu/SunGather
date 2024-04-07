@@ -5,10 +5,13 @@
 
 ### Improvements
 
-* SunGatherEvo can now write holding registers. It will establish an HTTP
-  server and listen to GET and POST requests. **Make sure to read the
-documentation and understand the security implications before activating this
-feature!**
+* SunGatherEvo can now write holding registers. It will establish a basic HTTP
+  server and listen to GET and POST requests.
+
+> [!CAUTION]
+> Make sure you understand the security implications before activating this
+> feature!
+
 
 ## Version SunGatherEvo v1.2
 

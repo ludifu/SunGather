@@ -323,15 +323,15 @@ for visualization of the result.)
 > authentication / authorization. Before enabling this server make sure you
 > understand the security risks this imposes!
 
-Securing the server should involve infrastructure changes like a firewall and
-areverse proxy setup with a full blown HTTP server like Apache or nginx. Adding
-the required level of security is not in scope of this implementation. 
+Securing the server should involve infrastructure measures like a firewall and
+a reverse proxy setup with a full blown HTTP server like Apache or nginx.
+Adding the required level of security is not in scope of this implementation!
 
 > [!NOTE]
 > Why provide another way to manipulate holding registers as part of a
 > monitoring tool? There are many ways to configure a Sungrow inverter which
-> are suitable for the most users. Some solutions are discussion below
-> providing their respective strengths and weaknesses.
+> are suitable for the majority of users. Some solutions are discussed below
+> with their respective strengths and weaknesses.
 
 Sungrow provides a smartphone app and the integrated Webserver of the
 WiNet-Dongles mainly for initial setup. These are limited to local access and
@@ -341,32 +341,35 @@ The **iSolarCloud application** may be the easiest solution: It allows remote
 changes and it is at least intended to be end user friendly. Full access to
 most settings is possible although it requires a separate installer account as
 a workaround. One huge downside is that it forces a user to give full network
-access to the inverter and let Sungrow and who else access the installation as
-well. Sungrow has in the past provided firmware updates without asking and even
-prior announcement and users experienced broken functionalities of their
-installations afterwards. Not every owner of an inverter may want to accept
-this risk.
+access to the inverter and in turn let Sungrow - and who else - access the
+installation.  Sungrow has in the past forced broken firmware updates on users
+without asking or even prior announcement. Users experienced broken
+functionalities of their installations because of this. This is one of the
+reasons not every owner of an inverter may want to accept external access to
+his installation.
 
-Another possibility is a **Home Assistant** installation with automations. This is
-quite easy to use once the required automations have been created. It can be
-made available for remote operation without delegating any security to third
-party cloud applications. Depending on the Sungrow integration it may be quite
-limited in terms of available registers for monitoring or configuring. And for
-users not interested home automation it is probably too big of a tool.
+A **Home Assistant** installation with automations is another way for
+configuring a Sungrow inverter. This is quite easy to use once the required
+automations have been created / installed. Home Assistant can be made available
+for remote operation without delegating any security to third party cloud
+applications. The downside: All of the existing ready made integrations are
+very limited in terms of available registers for monitoring or configuring. And
+for users not interested in home automation Home Assistant is probably too big
+of a tool anyway.
 
 Finally for the tech savvy the most obvious solution is using a command line
-tool like `mbpoll` to directly communicate with an inverter. This requires
-solid understanding of Unix shells iand the m,odbus protocol. Secure remote
-operation requires the skills of an experienced network engineer. Also is
-requires detailed knowledge of the Sungrow specifications, the register
-addresses and the value mappings for specific registers.
+tool like `mbpoll` to directly communicate with an inverter. This requires to
+be familiar with Unix shells and some understanding of the modbus protocol sure
+comes in handy. Secure remote operation requires the skills of an experienced
+network engineer. Also it requires detailed knowledge of the Sungrow
+specifications - including their bugs - to obtain the register addresses and
+the value mappings for specific registers.
 
-SunGathereEvo fills a rather small gap: Without solid understanding of how to
-secure it for remote operation it is limited to local operation and in its
-current state it requires using a shell as well. However it has advantages over
-using `mbpoll`: Manipulating registers abstracts from the addresses and can be
-done using the register names know from SunGatherEvo. Also target values are
-provided in the same format as delivered as output of SunGatherEvo: If
+SunGathereEvo fills a rather small gap: Like `mbpoll` it requires shell
+familiarity and the same skills for securing remote accesses.  The advantage
+over `mbpoll` is that manipulating registers abstracts from the addresses and
+can be done using the register names know from SunGatherEvo. Also target values
+are provided in the same format as delivered as output of SunGatherEvo: If
 SunGatherevo reports a feature as "Enabled" or "Disabled" it can be changed
 using these values as well - instead of providing values like 0x55 or 0xAA.
 
