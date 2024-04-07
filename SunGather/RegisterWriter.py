@@ -10,13 +10,6 @@ from collections import deque
 
 import logging
 
-# First working version.
-
-# TODO Use datarange attributes of registers to allow specifying data in the
-# format the client uses for output, especially "enabled" or "disabled" instead
-# of numeric values.
-
-
 def _thread_start():
     # Must be a function (not a method) to be used in the Thread() constructor
     # ...
@@ -26,6 +19,15 @@ def _thread_start():
 
 
 class RegisterWriter(object):
+
+    # This class provides services to write to holding registers. It spawns an
+    # HTTPServer thread and listens to POST and GET requests. Via POST request
+    # to /registers and providing a JSON representation of a python dictionary
+    # with register names as keys and target values as values one or more
+    # holding registers can be written. A GET request to /registers will
+    # deliver a list of holding registers know to the running instance of the
+    # SungrowClient which can be written to.
+
     # The Singleton instance of this class
     _instance = None
 
@@ -47,7 +49,9 @@ class RegisterWriter(object):
 
     def setup(self, sgclient, port=8888):
         # This method must be called exactly once after acquiring an instance
-        # of this class. Subsequent calls will fail and log an error.
+        # of this class. A fully configured (i.e. including registers) instance
+        # of a SungrowClient must be provided. Subsequent calls will fail and
+        # log an error.
         if self._sungrow_client is None:
             self._sungrow_client = sgclient
             self.serverport = port
@@ -99,8 +103,33 @@ class RegisterWriter(object):
             logging.error(f"Cannot update custom register ´{register['name']}`!")
             return
 
-        # TODO We need to convert the value according to the accuracy of the
-        # register definition. Then omit this check:
+        datarange = register.get("datarange")
+        if datarange is not None:
+            # If the provided target value is found in the mapping substitute
+            # with the "real" value. If the provided value is not found emit a
+            # warning, but keep the target value. This allows to set registers
+            # even if the mapping is not known by specifying the required
+            # integer number directly. If an unknow string is provided this
+            # would not work, but this case is covered by the next check.
+            match = False
+            for entry in datarange:
+                if entry["value"] == target_value:
+                    target_value = entry["response"]
+                    match = True
+                    break
+            if not match:
+                logging.warning(
+                    f"Value ´{target_value}` not found in the value mapping for register ´{register['name']}`!"
+                )
+
+        accuracy = register.get("accuracy")
+        if accuracy is not None:
+            # Apply an accuracy value if configured for that register. The
+            # accuracy is a factor to apply to a register read from the
+            # inverter. For writing a division is required. The result must be
+            # an integer, so apply integer division.
+            target_value = target_value // accuracy
+
         if not isinstance(target_value, int):
             # we can only update with integer values.
             logging.error(f"Integer required, got ´{target_value}` instead!")
@@ -120,8 +149,11 @@ class RegisterWriter(object):
 
     def compact_updates(self, update_dict):
         # update_dict contains key value pairs of register addresses and target
-        # values. Create andd return a dictionary containing addresses as keys
+        # values. Create and return a dictionary containing addresses as keys
         # and a list of target values to write starting at the address.
+        # Rationale: The PyModbus can write a list of values to a starting
+        # address. Instead of one write operation per register this requires
+        # only one write operation per contiguous address area.
         compacted_updates = {}
 
         # To handle the addresses in ascending order, use a deque to be able to
@@ -173,7 +205,6 @@ class RegisterWriter(object):
                 slave=self._sungrow_client.inverter_config.get("slave"),
                 unit=self._sungrow_client.inverter_config.get("slave"),
             )
-
             if rr.isError():
                 logging.warning("Modbus connection failed!")
                 logging.debug(f"{rr}")
