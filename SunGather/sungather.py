@@ -35,12 +35,7 @@ def main():
 
     exports = setup_exports(app_config, inverter)
 
-    import_config = app_config.get("imports")
-    if import_config is not None:
-        for imp in import_config:
-            if imp.get("name") == "http" and imp.get("enabled"):
-                r = RegisterWriter()
-                r.setup(inverter, port=8888)
+    setup_imports(app_config, inverter_config, inverter)
 
     core_loop(
         inverter,
@@ -195,6 +190,26 @@ def setup_inverter(inverter_config, register_config_filename):
     inverter.close()
     inverter.print_register_list()
     return inverter
+
+
+def setup_imports(app_config, inverter_config, inverter):
+    import_config = app_config.get("imports")
+    if import_config is not None:
+        for imp in import_config:
+            # There is no other import than the http one ...
+            if imp.get("name") == "http" and imp.get("enabled"):
+                # This works only with ´modbus` or ´sungrow` conection, not
+                # http unfortunately. Warn and ignore...
+                if not (
+                    inverter_config.get("connection") == "modbus"
+                    or inverter_config.get("connection") == "sungrow"
+                ):
+                    logging.warning(
+                        "Import feature is only available, if connections is configured to ´modbus` or ´sungrow`! Import is disabled ..."
+                    )
+                    return
+                r = RegisterWriter()
+                r.setup(inverter, port=8888)
 
 
 def setup_exports(app_configuration, inverter):
