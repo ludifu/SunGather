@@ -6,18 +6,33 @@ version: "v2.0.1"
 
 # Bugfixes:
 
-# - off_grid_option (13075): Corrected datarange, changed to "Enabled" / "Disabled"
-# - external_ems_heartbeat (13080): Added unit "s"
 # - start_stop_13000 (13000): Added datarange 0xCF = "Start", 0xCE = "Stop"
+# - do_configuration (13001): Added datarange 0 = "Off", 1 = "Load Control Mode", 2 = "Grounding Fault Indication", 3 = "MicroGrid System Mode"
+# - load_control_mode (13002): Added datarange 0 = "Timing mode", 1 = "ON/OFF mode", 2 = "Power optimized mode", 3 = "Disable"
+# - load_1_timing_period_1_start_hour (13003): added unit "HH"
+# - load_1_timing_period_1_start_minute (13004): Added unit "MM"
+# - load_1_timing_period_1_end_hour (13005): added unit "HH"
+# - load_1_timing_period_1_end_minute (13006): Added unit "MM"
+# - load_2_timing_period_1_start_hour (13007): added unit "HH"
+# - load_2_timing_period_1_start_minute (13008): Added unit "MM"
+# - load_2_timing_period_1_end_hour (13009): added unit "HH"
+# - load_2_timing_period_1_end_minute (13010): Added unit "MM"
 # - load_1_on_off_mode (13011): Added datarange 0xAA = "On", 0x55 = "Off"
 # - load_1_power-optimized_mode_start_hour (13012): Added unit "HH"
 # - load_1_power-optimized_mode_start_minute (13013): Added unit "MM"
 # - load_1_power-optimized_mode_end_hour (13014): Added unit "HH"
 # - load_1_power-optimized_mode_end_minute (13015): Added unit "MM"
-
-
-
-
+# - off_grid_option (13075): Corrected datarange, changed to "Enabled" / "Disabled"
+# - external_ems_heartbeat (13080): Added unit "s"
+# - forced_charging_valid_time (33209): Added datarange 0 = "Weekday", 1 = "Every Day"
+# - forced_charging_1_start_hour (33210): Added unit "HH"
+# - forced_charging_1_start_minute (33211): Added unit "MM"
+# - forced_charging_1_end_hour (33212): Added unit "HH"
+# - forced_charging_1_end_minute (33213): Added unit "MM"
+# - forced_charging_2_start_hour (33215): Added unit "HH"
+# - forced_charging_2_start_minute (33216): Added unit "MM"
+# - forced_charging_2_end_hour (33217): Added unit "HH"
+# - forced_charging_2_end_minute (33218): Added unit "MM"
 
 
 # v2.0.0
@@ -2903,51 +2918,77 @@ registers:
       address: 13001
       level: 2
       datatype: "U16"
+      datarange:
+        - response: 0
+          value: "Off"
+        - response: 1
+          value: "Load Control Mode"
+        - response: 2
+          value: "Grounding Fault Indication"
+        - response: 3
+          value: "MicroGrid System Mode"
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
     - name: "load_control_mode"
       address: 13002
       level: 2
       datatype: "U16"
+      datarange:
+        - response: 0
+          value: "Timing mode"
+        - response: 1
+          value: "ON/OFF mode"
+        - response: 2
+          value: "Power optimized mode"
+        - response: 3
+          value: "Disable"
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
     - name: "load_1_timing_period_1_start_hour"
       address: 13003
       level: 2
       datatype: "U16"
+      unit: "HH"
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
     - name: "load_1_timing_period_1_start_minute"
       address: 13004
       level: 2
       datatype: "U16"
+      unit: "MM"
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
     - name: "load_1_timing_period_1_end_hour"
       address: 13005
       level: 2
       datatype: "U16"
+      unit: "HH"
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
     - name: "load_1_timing_period_1_end_minute"
       address: 13006
       level: 2
       datatype: "U16"
+      unit: "MM"
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
     - name: "load_1_timing_period_2_start_hour"
       address: 13007
       level: 2
       datatype: "U16"
+      unit: "HH"
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
     - name: "load_1_timing_period_2_start_minute"
       address: 13008
       level: 2
       datatype: "U16"
+      unit: "MM"
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
     - name: "load_1_timing_period_2_end_hour"
       address: 13009
       level: 2
       datatype: "U16"
+      unit: "HH"
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
     - name: "load_1_timing_period_2_end_minute"
       address: 13010
       level: 2
       datatype: "U16"
+      unit: "MM"
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
     - name: "load_1_on_off_mode"
       address: 13011
@@ -3180,26 +3221,35 @@ registers:
       address: 33209
       level: 2
       datatype: "U16"
+      datarange:
+        - response: 0
+          value: "Weekday"
+        - response: 1
+          value: "Every Day"
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
     - name: "forced_charging_1_start_hour"
       address: 33210
       level: 2
       datatype: "U16"
+      unit: "HH"
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
     - name: "forced_charging_1_start_minute"
       address: 33211
       level: 2
       datatype: "U16"
+      unit: "MM"
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
     - name: "forced_charging_1_end_hour"
       address: 33212
       level: 2
       datatype: "U16"
+      unit: "HH"
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
     - name: "forced_charging_1_end_minute"
       address: 33213
       level: 2
       datatype: "U16"
+      unit: "MM"
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
     - name: "forced_charging_1_target_soc"
       address: 33214
@@ -3212,21 +3262,25 @@ registers:
       address: 33215
       level: 2
       datatype: "U16"
+      unit: "HH"
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
     - name: "forced_charging_2_start_minute"
       address: 33216
       level: 2
       datatype: "U16"
+      unit: "MM"
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
     - name: "forced_charging_2_end_hour"
       address: 33217
       level: 2
       datatype: "U16"
+      unit: "HH"
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
     - name: "forced_charging_2_end_minute"
       address: 33218
       level: 2
       datatype: "U16"
+      unit: "MM"
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
     - name: "forced_charging_2_target_soc"
       address: 33219
