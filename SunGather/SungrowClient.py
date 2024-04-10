@@ -413,9 +413,10 @@ class SungrowClientCore():
                         logging.debug(f"Skipping register {register.get('name')}, has been read within update_frequency.")
                         continue
                     register_value = self.interpret_value_for_register(rr, num, register)
-                    # remember the last update timestamp in the register, if the register has an individual update_frequency configured:
-                    if register.get("update_frequency"):
-                        register["last_update"] = datetime.now()
+                    # remember the last update timestamp in the register:
+                    register["last_update"] = datetime.now()
+                    # remember the last value read for the register:
+                    register["last_read_value"] = register_value
                     # Set the final register value with adjustments above included 
                     self.latest_scrape[register["name"]] = register_value
         return True
