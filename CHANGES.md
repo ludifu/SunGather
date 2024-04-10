@@ -1,6 +1,10 @@
 # Change log
 
-## Version SunGatherEvo (1.2)
+## Version SunGatherEvo 1.3
+
+Many fixes for registers, mostly units and dataranges added.
+
+## Version SunGatherEvo 1.2
 
 ### Improvements
 
@@ -11,7 +15,7 @@ inverter models as well as more added registers. The file has its own version
 v2.0.0
 
 
-## Version SunGatherEvo (1.1)
+## Version SunGatherEvo 1.1
 
 ### Improvements
 
