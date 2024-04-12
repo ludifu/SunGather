@@ -1,6 +1,13 @@
-version: "v2.0.1"
+version: "v2.0.2"
 # change log:
-#
+
+
+# v2.0.2
+
+# Bugfixes
+
+# - system_state (13000): Changed "Fault" / 0x55000 to 0x5500, "Warn Run" / 0x12000 to 0x1200 (both values are typos in the specification and impossible for a 16 bit value.)
+
 
 # v2.0.1
 
@@ -2065,6 +2072,8 @@ registers:
       datarange:
         - response: 0x0000
           value: "Run"
+        - response: 0x0040
+          value: "Run"
         - response: 0x0001
           value: "Stop"
         - response: 0x0002
@@ -2093,6 +2102,8 @@ registers:
           value: "Off-grid Run"
         - response: 0x1111
           value: "Uninitialized"
+        - response: 0x1200
+          value: "Initial standby"
         - response: 0x1300
           value: "Shutdown"
         - response: 0x1400
@@ -2115,6 +2126,8 @@ registers:
           value: "EMS Run"
         - response: 0x4001
           value: "Emergency Charging Operation"
+        - response: 0x5500
+          value: "Fault"
         - response: 0x8000
           value: "Stop"
         - response: 0x8100
@@ -2123,10 +2136,6 @@ registers:
           value: "Dispatch Running"
         - response: 0x9100
           value: "Warn Run"
-        - response: 0x12000
-          value: "Initial standby"
-        - response: 0x55000
-          value: "Fault"
       default: "Unknown"
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
     - name: "running_state"
