@@ -1837,100 +1837,100 @@ registers:
       datatype: "U16"
       unit: "W"
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
-    - name: "direct_power_consumption_pv"   # deprecated, replaced by series of registers, see below 
+    - name: "direct_power_consumption_pv"
       level: 1
       address: 6386
       datatype: "U16"
       accuracy: 0.1
       unit: "kWh"
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "direct_power_consumption_monthly_pv" # deprecated, replaced by series of registers, see below 
+      level: 2
+      address: 6417
+      datatype: "U16"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
     - name: "monthly_direct_power_consumption_01_january"
       level: 2
-      address: 6386
+      address: 6417
       datatype: "U16"
       accuracy: 0.1
       unit: "kWh"
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
     - name: "monthly_direct_power_consumption_02_february"
       level: 2
-      address: 6387
+      address: 6418
       datatype: "U16"
       accuracy: 0.1
       unit: "kWh"
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
     - name: "monthly_direct_power_consumption_03_march"
       level: 2
-      address: 6388
+      address: 6419
       datatype: "U16"
       accuracy: 0.1
       unit: "kWh"
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
     - name: "monthly_direct_power_consumption_04_april"
       level: 2
-      address: 6389
+      address: 6420
       datatype: "U16"
       accuracy: 0.1
       unit: "kWh"
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
     - name: "monthly_direct_power_consumption_05_may"
       level: 2
-      address: 6390
+      address: 6421
       datatype: "U16"
       accuracy: 0.1
       unit: "kWh"
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
     - name: "monthly_direct_power_consumption_06_june"
       level: 2
-      address: 6391
+      address: 6422
       datatype: "U16"
       accuracy: 0.1
       unit: "kWh"
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
     - name: "monthly_direct_power_consumption_07_july"
       level: 2
-      address: 6392
+      address: 6423
       datatype: "U16"
       accuracy: 0.1
       unit: "kWh"
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
     - name: "monthly_direct_power_consumption_08_august"
       level: 2
-      address: 6393
+      address: 6424
       datatype: "U16"
       accuracy: 0.1
       unit: "kWh"
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
     - name: "monthly_direct_power_consumption_09_september"
       level: 2
-      address: 6394
+      address: 6425
       datatype: "U16"
       accuracy: 0.1
       unit: "kWh"
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
     - name: "monthly_direct_power_consumption_10_october"
       level: 2
-      address: 6395
+      address: 6426
       datatype: "U16"
       accuracy: 0.1
       unit: "kWh"
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
     - name: "monthly_direct_power_consumption_11_november"
       level: 2
-      address: 6396
+      address: 6427
       datatype: "U16"
       accuracy: 0.1
       unit: "kWh"
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
     - name: "monthly_direct_power_consumption_12_december"
       level: 2
-      address: 6397
-      datatype: "U16"
-      accuracy: 0.1
-      unit: "kWh"
-      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
-    - name: "direct_power_consumption_monthly_pv"    
-      level: 2
-      address: 6417
+      address: 6428
       datatype: "U16"
       accuracy: 0.1
       unit: "kWh"
