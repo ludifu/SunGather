@@ -18,7 +18,7 @@ already contained many valuable updates. michbeck100 also implemented a
 [monitoring stack](https://github.com/michbeck100/pv-monitoring) with InfluxDB
 and Grafana, which I **highly recommend.**
 
-Unfortunately bohdan's project has stalled since more than a year: No bugfixes,
+When I created this fork bohdan's project had stalled for more than a year: No bugfixes,
 no updates to new Sungrow specifications, no support for new inverter models,
 ...
 
@@ -31,12 +31,14 @@ SunGatherEvo is based on version v0.5.3 (last original version from February
 2023) plus changes from michbeck100. It has its own version number, starting at
 `v1.0.0`.[^2] For a detailed list of changes see the [change log](CHANGES.md).
 
-[^2]: As long as contributing into the original project is not possible there
-must be a way to keep track of development, i.e. a version number. Of course I
-cannot continue using the original version number as maintaining the original
-project's version is the author's exclusive right. Btw. creating my own
-independent version number was the main reason why I renamed the fork to
-SunGatherEvo: The version number would have been ambiguous otherwise.
+[^2]: I did not plan to contribute back into the original project via pull
+    requests. The reasin is that I did not assume the original project would be
+continued after an inactive period that long. So I needed a way to keep track
+of development, i.e. a version number. Of course I cannot continue using the
+original version number as maintaining the original project's version is the
+author's exclusive right. Btw. creating my own independent version number was
+the main reason why I renamed the fork to SunGatherEvo: The version number
+would have been ambiguous otherwise.
 
 # Using SunGatherEvo
 
