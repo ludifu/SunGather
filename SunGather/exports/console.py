@@ -18,12 +18,20 @@ class export_console(object):
         return True
 
     def publish(self, inverter):
-        print("+------------------------------------------------------------------------------------+") 
-        print("| {:<7} | {:<42} | {:<27} |".format('Address', 'Register','Value'))
-        print("+---------+--------------------------------------------+-----------------------------+") 
-        for register, value in inverter.latest_scrape.items():
-            print("| {:<7} | {:<42} | {:<27} |".format(str(inverter.getRegisterAddress(register)), str(register), str(value) + " " + str(inverter.getRegisterUnit(register))))
-        print("+---------+--------------------------------------------+-----------------------------+") 
-        print(f"Logged {len(inverter.latest_scrape)} registers to Console")
+        max_name_len = 1
+        for reg in inverter.get_my_register_list():
+            max_name_len = max(max_name_len, len(reg["name"]))
+        table_width = 42 + max_name_len
 
+        bar = "+" + str.ljust("", table_width, "-") + "+"
+
+        print(bar)
+        print("| {:<7} | ".format('Address') + str(str.ljust("Register", max_name_len)) + " | {:<27} |".format('Value'))
+        print(bar)
+        for register, value in inverter.latest_scrape.items():
+            print("| {:<7} | ".format(str(inverter.getRegisterAddress(register))) + str(str.ljust(register, max_name_len)) + " | {:<27} |".format(str(value) + " " + str(inverter.getRegisterUnit(register))))
+        print(bar)
+
+        print(f"Logged {len(inverter.latest_scrape)} registers to Console")
         return True
+

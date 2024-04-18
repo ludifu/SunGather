@@ -605,15 +605,22 @@ class SungrowClientCore():
 
 
     def print_register_list(self):
-        print("+---------------------------------------------------------------------------------+")
-        print("| List of registers which are read from the inverter.                             |")
-        print("| The list is filtered according to the level and model support.                  |")
-        print("+--------------------------------------------+-------+------+-----+-------+-------+")
-        print("| {:<42} | {:^5} | {:<4} |{:^5}| {:<5} | {:<5} |".format('register name', 'unit', 'type', 'slave', 'freq.', 'addr.'))
-        print("+--------------------------------------------+-------+------+-----+-------+-------+")
-        for reg in self.registers:
-            print("| {:<42} | {:^5} | {:<4} | {:<3} | {:<5} | {:<5} |".format(reg.get("name"), reg.get("unit",""), reg.get("type"), reg.get("slave", ""), reg.get("update_frequency", ""), reg.get("address", "----")))
-        print("+--------------------------------------------+-------+------+-----+-------+-------+")
+        max_name_len = 1
+        for reg in self.get_my_register_list():
+            max_name_len = max(max_name_len, len(reg["name"]))
+        table_width = 81 - 42 + max_name_len
+
+        bar = "+" + str.ljust("", table_width, "-") + "+"
+
+        print(bar)
+        print("| "+ str.ljust("List of registers which are read from the inverter.", table_width - 2) + " |")
+        print("| "+ str.ljust("The list is filtered according to the level and model support.", table_width - 2) + " |")
+        print(bar)
+        print("| " + str.ljust('register name', max_name_len) + " | {:^5} | {:<4} |{:^5}| {:<5} | {:<5} |".format('unit', 'type', 'slave', 'freq.', 'addr.'))
+        print(bar)
+        for reg in self.get_my_register_list():
+            print("| " + str.ljust(reg.get('name'), max_name_len) + " | {:^5} | {:<4} | {:<3} | {:<5} | {:<5} |".format(reg.get("unit",""), reg.get("type", ""), reg.get("slave", ""), reg.get("update_frequency", ""), reg.get("address", "----")))
+        print(bar)
 
 
 class SungrowClient(SungrowClientCore):
