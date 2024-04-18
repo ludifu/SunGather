@@ -1,9 +1,21 @@
 # Change log
 
+## Version SunGatherEvo 1.6
+
+### Improvements
+
+* SunGatherEvo can now write holding registers. It will establish a basic HTTP
+  server and listen to GET and POST requests. This feature is **DISABLED** by
+default.
+
+> [!CAUTION]
+> Make sure you understand the security implications before activating this
+> feature!
+
 
 ## Version SunGatherEvo 1.5
 
-More fixes for registers. registers-sungrow.yaml is v2.2.0
+More fixes for registers. `registers-sungrow.yaml` is v2.2.0
 
 ## Version SunGatherEvo 1.4
 
