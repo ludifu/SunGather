@@ -10,6 +10,7 @@ from collections import deque
 
 import logging
 
+
 def _thread_start():
     # Must be a function (not a method) to be used in the Thread() constructor
     # ...
@@ -19,7 +20,6 @@ def _thread_start():
 
 
 class RegisterWriter(object):
-
     # This class provides services to write to holding registers. It spawns an
     # HTTPServer thread and listens to POST and GET requests. Via POST request
     # to /registers and providing a JSON representation of a python dictionary
@@ -67,7 +67,7 @@ class RegisterWriter(object):
         # retrieve register names and target values from post_data and create
         # and return a dictionary containing the target addresses and target
         # values.
-        updates = {}
+        updates = []
         for key, value in postdata.items():
             register = None
             for reg in self._sungrow_client.get_my_register_list():
@@ -145,9 +145,24 @@ class RegisterWriter(object):
             )
             return
 
-        updates[address] = target_value
+        reg_name = register["name"]
+        last_read_value = None
+        for reg in self._sungrow_client.get_my_register_list():
+            if reg_name == reg["name"]:
+                last_read_value = reg.get("last_read_value")
+                break
+        updates.append(
+            {
+                "name": reg_name,
+                "address": address,
+                "target_value": target_value,
+                "last_read_value": last_read_value,
+            }
+        )
 
-    def compact_updates(self, update_dict):
+    def compact_updates(self, update_list):
+        update_dict = {x["address"]: x["target_value"] for x in update_list}
+
         # update_dict contains key value pairs of register addresses and target
         # values. Create and return a dictionary containing addresses as keys
         # and a list of target values to write starting at the address.
@@ -306,4 +321,5 @@ class WebRequestHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-Type", "application/json")
         self.end_headers()
-        self.wfile.write(json.dumps(compacted_updates).encode("utf-8"))
+
+        self.wfile.write(json.dumps(updates).encode("utf-8"))
