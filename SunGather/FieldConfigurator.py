@@ -39,7 +39,6 @@ class FieldConfigurator:
             )
             sys.exit(1)
 
-
         v = JSONSchemaValidator()
         logging.info(
             f"Performing schema validation of registers file ´{self._registers_filename}` ..."
@@ -196,30 +195,43 @@ class FieldConfigurator:
         reg[attribute_name] = attribute_value
 
     def print_register_list(self):
+        max_name_len = 1
+        for reg in self.registers["registers"][0]["read"]:
+            max_name_len = max(max_name_len, len(reg["name"]))
+        for reg in self.registers["registers"][1]["hold"]:
+            max_name_len = max(max_name_len, len(reg["name"]))
+        table_width = 89 - 44 + max_name_len
+
+        bar = "+" + str.ljust("", table_width, "-") + "+"
+
+        print(bar)
         print(
-            "+-------------------------------------------------------------------------------------+"
+            "| "
+            + str.ljust("Register definitions after applying patches.", table_width - 2)
+            + " |"
         )
         print(
-            "| Register definitions after applying patches.                                        |"
+            "| "
+            + str.ljust(
+                "Note: The list is not (yet) filtered by supported models!",
+                table_width - 2,
+            )
+            + " |"
         )
+        print(bar)
         print(
-            "| Note: The list is not (yet) filtered by supported models!                           |"
-        )
-        print(
-            "+--------------------------------------------+-------+------+-------+-------+---+-----+"
-        )
-        print(
-            "| {:<42} | {:^5} | {:<4} | {:<5} | {:<5} |{:^3}|{:^5}|".format(
-                "register name", "unit", "type", "freq.", "addr", "lvl", "slave"
+            "| "
+            + str.ljust("register name", max_name_len)
+            + " | {:^5} | {:<4} | {:^5} | {:>5} |{:^3}| {:^5} |".format(
+                "unit", "type", "freq.", "addr", "lvl", "slave"
             )
         )
-        print(
-            "+--------------------------------------------+-------+------+-------+-------+---+-----+"
-        )
+        print(bar)
         for reg in self.registers["registers"][0]["read"]:
             print(
-                "| {:<42} | {:^5} | {:<4} | {:>5} | {:>5} |{:^3}| {:^3} |".format(
-                    reg.get("name"),
+                "| "
+                + str.ljust(reg.get("name"), max_name_len)
+                + " | {:^5} | {:<4} | {:^5} | {:>5} |{:^3}| {:^5} |".format(
                     reg.get("unit", ""),
                     "read",
                     reg.get("update_frequency", ""),
@@ -230,16 +242,15 @@ class FieldConfigurator:
             )
         for reg in self.registers["registers"][1]["hold"]:
             print(
-                "| {:<42} | {:^5} | {:<4} | {:>5} | {:>5} |{:^3}| {:^3} |".format(
-                    reg.get("name"),
+                "| "
+                + str.ljust(reg.get("name"), max_name_len)
+                + " | {:^5} | {:<4} | {:^5} | {:>5} |{:^3}| {:^5} |".format(
                     reg.get("unit", ""),
-                    "hold",
+                    "read",
                     reg.get("update_frequency", ""),
                     reg.get("address", "-----"),
                     reg.get("level", "-"),
                     reg.get("slave", " "),
                 )
             )
-        print(
-            "+--------------------------------------------+-------+------+-------+-------+---+-----+"
-        )
+        print(bar)
