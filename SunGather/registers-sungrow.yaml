@@ -1,5 +1,10 @@
-version: "v2.0.2"
+version: "v2.2.0"
 # change log:
+
+# v2.2.0
+
+# Added max_permitted_charging_power_from_ac (33277). The register is reverse engineered, not contained in a specification. model support is an assumption, however only hybrids can support charging a battery.
+
 
 # v2.1.0
 
@@ -3472,6 +3477,13 @@ registers:
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
     - name: "load_rated_power"
       address: 33274
+      level: 2
+      datatype: "U16"
+      unit: "kW"
+      accuracy: 0.01
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11"]
+    - name: "max_permitted_charging_power_from_ac" # register is reverse engineered, not contained in specification. model support is an assumption.
+      address: 33277
       level: 2
       datatype: "U16"
       unit: "kW"

@@ -1,5 +1,14 @@
 # Change log
 
+
+## Version SunGatherEvo 1.5
+
+More fixes for registers. registers-sungrow.yaml is v2.2.0
+
+## Version SunGatherEvo 1.4
+
+More fixes for registers.
+
 ## Version SunGatherEvo 1.3
 
 Many fixes for registers, mostly units and dataranges added.
