@@ -1,5 +1,11 @@
 # Change log
 
+## Version SunGatherEvo 1.7
+
+### Improvements
+
+* Added registers yearly_battery_charge_power_from_pv_xxxx and yearly_direct_power_consumption_pv_xxxx
+
 ## Version SunGatherEvo 1.6
 
 ### Improvements
