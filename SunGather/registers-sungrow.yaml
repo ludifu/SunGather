@@ -1,6 +1,11 @@
 version: "v2.2.0"
 # change log:
 
+# v2.3.0
+#
+# added yearly_battery_charge_power_from_pv_2015 ... yearly_battery_charge_power_from_pv_2034
+# added yearly_direct_power_consumption_pv_2015 ... yearly_direct_power_consumption_pv_2034
+  
 # v2.2.0
 
 # Added max_permitted_charging_power_from_ac (33277). The register is reverse engineered, not contained in a specification. model support is an assumption, however only hybrids can support charging a battery.
@@ -1940,10 +1945,150 @@ registers:
       accuracy: 0.1
       unit: "kWh"
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
-    - name: "direct_power_consumption_yearly_pv"    
+    - name: "direct_power_consumption_yearly_pv"   # deprecated, replaced by series of registers, see below 
       level: 2
       address: 6429
       datatype: "U16"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_direct_power_consumption_pv_2015"
+      level: 3
+      address: 6429 
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_direct_power_consumption_pv_2016"
+      level: 3
+      address: 6431 
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_direct_power_consumption_pv_2017"
+      level: 3
+      address: 6433 
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_direct_power_consumption_pv_2018"
+      level: 3
+      address: 6435 
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_direct_power_consumption_pv_2019"
+      level: 3
+      address: 6437 
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_direct_power_consumption_pv_2020"
+      level: 3
+      address: 6439 
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_direct_power_consumption_pv_2021"
+      level: 3
+      address: 6441 
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_direct_power_consumption_pv_2022"
+      level: 3
+      address: 6443 
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_direct_power_consumption_pv_2023"
+      level: 3
+      address: 6445 
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_direct_power_consumption_pv_2024"
+      level: 2
+      address: 6447 
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_direct_power_consumption_pv_2025"
+      level: 2
+      address: 6449 
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_direct_power_consumption_pv_2026"
+      level: 2
+      address: 6451 
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_direct_power_consumption_pv_2027"
+      level: 2
+      address: 6453 
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_direct_power_consumption_pv_2028"
+      level: 2
+      address: 6455 
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_direct_power_consumption_pv_2029"
+      level: 2
+      address: 6457 
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_direct_power_consumption_pv_2030"
+      level: 2
+      address: 6459 
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_direct_power_consumption_pv_2031"
+      level: 2
+      address: 6461 
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_direct_power_consumption_pv_2032"
+      level: 2
+      address: 6463 
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_direct_power_consumption_pv_2033"
+      level: 2
+      address: 6465 
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_direct_power_consumption_pv_2034"
+      level: 2
+      address: 6467 
+      datatype: "U32"
       accuracy: 0.1
       unit: "kWh"
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
@@ -2065,10 +2210,150 @@ registers:
       accuracy: 0.1
       unit: "kWh"
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
-    - name: "battery_charge_power_from_pv_yearly"    
-      level: 2
+    - name: "battery_charge_power_from_pv_yearly"   # deprecated, replaced by a series of registers, see below 
+      level: 3
       address: 6787
       datatype: "U16"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_battery_charge_power_from_pv_2015"
+      level: 3
+      address: 6787
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_battery_charge_power_from_pv_2016"
+      level: 3
+      address: 6789
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_battery_charge_power_from_pv_2017"
+      level: 3
+      address: 6791
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_battery_charge_power_from_pv_2018"
+      level: 3
+      address: 6793
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_battery_charge_power_from_pv_2019"
+      level: 3
+      address: 6795
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_battery_charge_power_from_pv_2020"
+      level: 3
+      address: 6797
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_battery_charge_power_from_pv_2021"
+      level: 3
+      address: 6799
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_battery_charge_power_from_pv_2022"
+      level: 3
+      address: 6801
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_battery_charge_power_from_pv_2023"
+      level: 3
+      address: 6803
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_battery_charge_power_from_pv_2024"
+      level: 2
+      address: 6805
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_battery_charge_power_from_pv_2025"
+      level: 2
+      address: 6807
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_battery_charge_power_from_pv_2026"
+      level: 2
+      address: 6809
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_battery_charge_power_from_pv_2027"
+      level: 2
+      address: 6811
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_battery_charge_power_from_pv_2028"
+      level: 2
+      address: 6813
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_battery_charge_power_from_pv_2029"
+      level: 2
+      address: 6815
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_battery_charge_power_from_pv_2030"
+      level: 2
+      address: 6817
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_battery_charge_power_from_pv_2031"
+      level: 2
+      address: 6819
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_battery_charge_power_from_pv_2032"
+      level: 2
+      address: 6821
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_battery_charge_power_from_pv_2033"
+      level: 2
+      address: 6823
+      datatype: "U32"
+      accuracy: 0.1
+      unit: "kWh"
+      models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
+    - name: "yearly_battery_charge_power_from_pv_2034"
+      level: 2
+      address: 6825
+      datatype: "U32"
       accuracy: 0.1
       unit: "kWh"
       models: ["SH3.0RS","SH3.6RS","SH4.0RS","SH5.0RS","SH4.6RS","SH6.0RS","SH8.0RS","SH10RS","SH5.0RT","SH6.0RT","SH8.0RT","SH10RT","SH5.0RT-20","SH6.0RT-20","SH8.0RT-20","SH10RT-20","SH5.0RT-V112","SH6.0RT-V112","SH8.0RT-V112","SH10RT-V112","SH5.0RT-V122","SH6.0RT-V122","SH8.0RT-V122","SH10RT-V122","SH5T-V11","SH6T-V11","SH8T-V11","SH10T-V11","SH12T-V11","SH15T-V11","SH20T-V11","SH25T-V11","SH5K-20","SH3K6","SH4K6","SH5K-V13","SH5K-30","SH3K6-30","SH4K6-30"]
